@@ -1,0 +1,122 @@
+/* register.css */
+
+/* Contenedor principal */
+.register-container {
+  width: 90%;
+  max-width: 400px;
+  margin: 40px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Formulario */
+.register-form {
+  width: 100%;
+  background-color: #fff; /* Ajusta a tu gusto */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+/* Título del formulario */
+.form-title {
+  margin: 0 0 20px 0;
+  text-align: center;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Mensajes de error o éxito */
+.error {
+  background-color: #ffe0e0;
+  color: #c0392b;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.success {
+  background-color: #e0ffe0;
+  color: #27ae60;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+/* Cada campo (label + input) */
+.input-wrapper {
+  display: flex;
+  flex-direction: column; /* Label encima del input */
+  margin-bottom: 15px;
+}
+
+.input-wrapper label {
+  margin-bottom: 5px;
+  font-weight: 500;  /* Un poco más de énfasis en el texto del label */
+}
+
+.input-wrapper input {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 0.95rem;
+}
+
+/* Botón de registro */
+.register-btn {
+  width: 100%;
+  background-color: #7c63f6;
+  color: #fff;
+  padding: 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.register-btn:hover {
+  background-color: #6b55d7;
+}
+
+/* Enlace a login */
+.login-link {
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.login-link a {
+  color: #7c63f6;
+  text-decoration: none;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+/* Estilos para el dropdown estilizado */
+.styled-dropdown {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  appearance: none; /* Quitar estilos por defecto en algunos navegadores */
+  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="%236c63ff"><path d="M6 9L2 5h8z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.styled-dropdown:focus {
+  border-color: #6c63ff;
+  outline: none;
+}
+

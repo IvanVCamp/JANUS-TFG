@@ -1,0 +1,194 @@
+/* home.css */
+
+/* Fuente Poppins, por ejemplo */
+* {
+  font-family: 'Poppins', sans-serif;
+  box-sizing: border-box;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  background-color: #e0e0e0; /* Fondo gris */
+}
+
+.home-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Barra superior */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #6c63ff;
+  color: #fff;
+  padding: 10px 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.left-section, .center-section, .right-section {
+  display: flex;
+  align-items: center;
+}
+
+.user-icon {
+  font-size: 2rem;
+  margin-right: 10px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.bell-icon {
+  font-size: 1.4rem;
+  margin-right: 20px;
+  cursor: pointer;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  outline: none;
+  padding: 5px 8px;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: rgba(255,255,255,0.1);
+  border-radius: 4px;
+}
+
+.logout-btn i {
+  margin-right: 5px;
+  font-size: 1.2rem;
+}
+
+/* Contenido principal */
+.main-content {
+  display: flex;
+  margin: 20px auto;
+  width: 90%;
+  max-width: 1200px;
+  gap: 20px;
+}
+
+/* Columna izquierda */
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  flex: 1; /* Para que se vea balanceado con la parte derecha */
+}
+
+/* Botones con distintos colores */
+.option-btn {
+  color: #fff;
+  border: none;
+  padding: 15px;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.option-btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn-tareas {
+  background-color: #4CAF50; /* Verde */
+}
+.btn-recordatorios {
+  background-color: #FFC107; /* Amarillo */
+  color: #333; /* Mejor contraste */
+}
+.btn-feedback {
+  background-color: #F44336; /* Rojo */
+}
+
+/* Columna derecha */
+.right-column {
+  flex: 3; /* Más espacio para calendario + lista de tareas */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Caja del calendario */
+.calendar-box {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Lista de tareas para la fecha seleccionada */
+.tasks-list {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.tasks-list h3 {
+  margin-top: 0;
+}
+
+/* Indicador para los días que tienen tareas */
+.task-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #FF5722; /* Un color llamativo */
+  border-radius: 50%;
+  margin: 0 auto;
+  margin-top: 3px;
+}
+
+/* Sección de bienvenida */
+.welcome-section {
+  width: 90%;
+  max-width: 1200px;
+  margin: 20px auto;
+  background-color: #fff;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.welcome-section h2 {
+  margin: 0 0 10px;
+}
+
+.welcome-section p {
+  margin: 0;
+}
+
+/* Pie de página */
+.footer-bar {
+  margin-top: auto; /* Empuja el footer al final */
+  text-align: center;
+  background-color: #6c63ff;
+  color: #fff;
+  padding: 10px 0;
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.3);
+}
+
+.footer-bar p {
+  margin: 0;
+  font-size: 0.9rem;
+}
