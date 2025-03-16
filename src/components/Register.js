@@ -137,22 +137,21 @@ function Register() {
           />
         </div>
 
-        {/* Dropdown para selección de rol */}
         <div className="input-wrapper roles-wrapper">
-          <label htmlFor="role">Selecciona tu rol:</label>
-          <select
+          <label htmlFor="role">Rol:</label>
+          <select 
             name="role"
             id="role"
             value={formData.role}
             onChange={handleSelectChange}
-            required
             className="styled-dropdown"
+            required
           >
-            <option value="">-- Selecciona un rol --</option>
+            <option value="">Seleccione un rol</option>
             <option value="Padre">Padre</option>
-            <option value="Tutor">Tutor</option>
-            <option value="Terapeuta">Terapeuta</option>
-            <option value="Paciente">Paciente</option>
+            <option value="paciente">Paciente</option>
+            <option value="terapeuta">Terapeuta</option>
+            <option value="tutor">Tutor</option>
           </select>
         </div>
 

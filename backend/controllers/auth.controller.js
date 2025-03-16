@@ -5,7 +5,8 @@ const { generateToken, generateResetToken } = require('../utils/token');
 const sendEmail = require('../utils/mailer');
 
 exports.register = async (req, res) => {
-  const { nombre, apellidos, fechaNacimiento, email, password } = req.body;
+  // Agregamos role en la desestructuración
+  const { nombre, apellidos, fechaNacimiento, email, password, role } = req.body;
 
   try {
     // Verificar si el usuario ya existe
@@ -28,13 +29,14 @@ exports.register = async (req, res) => {
       return res.status(400).json({ msg: 'Formato de fecha inválido' });
     }
 
-    // Crear y guardar usuario
+    // Crear y guardar usuario, incluyendo el rol
     user = new User({
       nombre,
       apellidos,
       fechaNacimiento: fechaNacimientoDate,
       email,
-      password
+      password,
+      role  // Se añade el rol recibido en req.body
     });
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);

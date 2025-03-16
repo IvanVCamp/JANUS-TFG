@@ -1,18 +1,37 @@
+// components/Messaging.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import chatService from '../services/chatService';
 import '../styles/messaging.css';
+import { jwtDecode } from 'jwt-decode'; // Asegúrate de usar la versión adecuada
 
 function Messaging() {
   const navigate = useNavigate();
 
-  // Estado local
-  const [chats, setChats] = useState([]);          // Lista de chats
+  // Obtener el ID del usuario actual decodificando el token
+  const [currentUserId, setCurrentUserId] = useState(null);
+
+  // Estados para chats y mensajes
+  const [chats, setChats] = useState([]);
   const [selectedChatId, setSelectedChatId] = useState(null);
-  const [messages, setMessages] = useState([]);     // Mensajes del chat seleccionado
-  const [searchQuery, setSearchQuery] = useState(''); // Para buscar usuarios
-  const [newMessage, setNewMessage] = useState('');   // Texto del mensaje
-  const [file, setFile] = useState(null);            // Archivo a adjuntar
+  const [messages, setMessages] = useState([]);
+
+  // Estados para la búsqueda de usuarios
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+
+  // Estados para el nuevo mensaje y archivo adjunto
+  const [newMessage, setNewMessage] = useState('');
+  const [file, setFile] = useState(null);
+
+  // Decodificar token al montar para obtener el ID del usuario actual
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decoded = jwtDecode(token);
+      setCurrentUserId(decoded.user?.id);
+    }
+  }, []);
 
   // Cargar la lista de chats al montar
   useEffect(() => {
@@ -27,7 +46,7 @@ function Messaging() {
     fetchChats();
   }, []);
 
-  // Cargar mensajes cuando se seleccione un chat
+  // Cargar mensajes cuando se selecciona un chat
   useEffect(() => {
     if (selectedChatId) {
       async function fetchMessages() {
@@ -44,40 +63,50 @@ function Messaging() {
     }
   }, [selectedChatId]);
 
-  // Manejo de selección de chat
-  const handleSelectChat = (chatId) => {
-    setSelectedChatId(chatId);
+  // Búsqueda con debounce de 300ms
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchQuery.trim()) {
+        chatService.searchUsers(searchQuery.trim())
+          .then(results => setSearchResults(results))
+          .catch(err => {
+            console.error('Error buscando usuarios:', err);
+            setSearchResults([]);
+          });
+      } else {
+        setSearchResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
+
+  // Manejo de cambios en el input de búsqueda
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
   };
 
-  // Manejo de búsqueda de usuarios (al presionar Enter)
-  const handleSearchKeyDown = async (e) => {
-    if (e.key === 'Enter' && searchQuery.trim() !== '') {
-      try {
-        // Buscar usuarios
-        const usersFound = await chatService.searchUsers(searchQuery.trim());
-        // Ejemplo: si el primer usuario es con quien iniciarás chat
-        if (usersFound.length > 0) {
-          const newChatUser = usersFound[0];
-          const newChat = await chatService.startChat(newChatUser.id);
-          // Actualizar lista de chats
-          setChats([...chats, newChat]);
-          setSelectedChatId(newChat.id);
-        }
-        setSearchQuery('');
-      } catch (err) {
-        console.error('Error iniciando chat:', err);
-      }
+  // Al seleccionar un usuario, iniciar o abrir el chat
+  const handleSelectUser = async (user) => {
+    try {
+      const newChat = await chatService.startChat(user._id);
+      setChats(prev => [...prev, newChat]);
+      setSelectedChatId(newChat._id || newChat.id);
+      setSearchQuery('');
+      setSearchResults([]);
+    } catch (err) {
+      console.error('Error iniciando chat:', err);
     }
   };
 
-  // Manejo de archivo adjunto
+  // Manejo de archivo adjunto: guarda el archivo seleccionado
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
     }
   };
 
-  // Enviar mensaje en el chat seleccionado
+  // Enviar mensaje en el chat seleccionado, incluyendo archivo si existe
   const handleSendMessage = async () => {
     if (!selectedChatId || !newMessage.trim()) return;
 
@@ -87,15 +116,19 @@ function Messaging() {
       if (file) {
         formData.append('file', file);
       }
-
       const msgCreated = await chatService.sendMessage(selectedChatId, formData);
-
-      // Actualizar la lista de mensajes localmente
-      setMessages([...messages, msgCreated]);
-
-      // Limpiar campos
+      setMessages(prev => [...prev, msgCreated]);
       setNewMessage('');
       setFile(null);
+
+      // Opcional: actualizar "lastMessage" en la lista de chats
+      setChats(prevChats =>
+        prevChats.map(c =>
+          (c._id === selectedChatId || c.id === selectedChatId)
+            ? { ...c, lastMessage: msgCreated }
+            : c
+        )
+      );
     } catch (err) {
       console.error('Error enviando mensaje:', err);
     }
@@ -103,14 +136,60 @@ function Messaging() {
 
   // Cerrar sesión
   const handleLogout = () => {
-    // Aquí podrías limpiar tokens, etc.
-    // Redirigir a la página inicial
     navigate('/');
+  };
+
+  // Función para obtener el "otro participante" (distinto al usuario actual)
+  const getOtherParticipant = (chat) => {
+    if (!chat.participants || !currentUserId) return null;
+    return chat.participants.find(p => p._id !== currentUserId);
+  };
+
+  // Renderizar la lista de chats en el panel izquierdo
+  const renderChatList = () => {
+    if (chats.length === 0) {
+      return (
+        <div className="no-chats">
+          <p>Comienza a conversar ahora con tus especialistas! <span>😊</span></p>
+        </div>
+      );
+    }
+
+    return (
+      <ul className="chat-list">
+        {chats.map((chat) => {
+          const chatId = chat._id || chat.id;
+          const otherUser = getOtherParticipant(chat);
+          const isSelected = chatId === selectedChatId;
+          return (
+            <li
+              key={chatId}
+              className={`chat-item ${isSelected ? 'selected' : ''}`}
+              onClick={() => setSelectedChatId(chatId)}
+            >
+              <div className="chat-avatar">
+                <i className="fa fa-user-circle" aria-hidden="true"></i>
+              </div>
+              <div className="chat-info">
+                <p className="chat-name">
+                  {otherUser ? `${otherUser.nombre} ${otherUser.apellidos}` : 'Usuario desconocido'}
+                </p>
+                {chat.lastMessage && (
+                  <p className="chat-last-message">
+                    {chat.lastMessage.text ? chat.lastMessage.text : '[Archivo adjunto]'}
+                  </p>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    );
   };
 
   return (
     <div className="messaging-container">
-      {/* Cabecera en morado */}
+      {/* Barra superior */}
       <header className="top-bar">
         <div className="left-section">
           <i className="fa fa-user-circle user-icon" aria-hidden="true"></i>
@@ -125,71 +204,60 @@ function Messaging() {
         </div>
       </header>
 
+      {/* Área principal */}
       <main className="messaging-main">
-        {/* Columna izquierda: Lista de chats + Búsqueda */}
+        {/* Columna izquierda: búsqueda y lista de chats */}
         <div className="chat-list-container">
           <div className="search-bar">
             <input
               type="text"
-              placeholder="To: Enviar a..."
+              placeholder="Buscar usuarios..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleSearchKeyDown}
+              onChange={handleSearchChange}
             />
+            {searchResults.length > 0 && (
+              <ul className="search-dropdown">
+                {searchResults.map((user) => (
+                  <li
+                    key={user._id}
+                    className="search-dropdown-item"
+                    onClick={() => handleSelectUser(user)}
+                  >
+                    {user.nombre} {user.apellidos} ({user.email})
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-
-          {chats.length === 0 ? (
-            <div className="no-chats">
-              <p>Comienza a conversar ahora con tus especialistas! <span>😊</span></p>
-            </div>
-          ) : (
-            <ul className="chat-list">
-              {chats.map((chat) => (
-                <li
-                  key={chat.id}
-                  className={`chat-item ${chat.id === selectedChatId ? 'selected' : ''}`}
-                  onClick={() => handleSelectChat(chat.id)}
-                >
-                  <div className="chat-avatar">
-                    <i className="fa fa-user-circle" aria-hidden="true"></i>
-                  </div>
-                  <div className="chat-info">
-                    <p className="chat-name">{chat.otherUserName} ({chat.otherUserRole})</p>
-                    {/* Podrías mostrar el último mensaje */}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+          {renderChatList()}
         </div>
 
-        {/* Columna derecha: Detalle del chat */}
+        {/* Columna derecha: detalle del chat */}
         <div className="chat-detail">
           {selectedChatId ? (
             <>
-              {/* Mensajes */}
               <div className="messages-area">
-                {messages.map((msg, idx) => (
-                  <div
-                    key={idx}
-                    className={`message-item ${
-                      msg.senderId === 'CURRENT_USER_ID' ? 'message-outgoing' : 'message-incoming'
-                    }`}
-                  >
-                    <p className="message-sender">{msg.senderName}:</p>
-                    <p className="message-text">{msg.text}</p>
-                    {msg.fileUrl && (
-                      <div className="message-file">
-                        <a href={msg.fileUrl} download>
-                          {msg.fileName || 'Descargar archivo'}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                {messages.map((msg, idx) => {
+                  // Si el backend no popula el sender, usa: msg.sender === currentUserId
+                  // Si se popula, usa msg.sender._id === currentUserId
+                  const isOutgoing = msg.sender?._id === currentUserId || msg.sender === currentUserId;
+                  return (
+                    <div
+                      key={idx}
+                      className={`message-item ${isOutgoing ? 'message-outgoing' : 'message-incoming'}`}
+                    >
+                      <p className="message-text">{msg.text}</p>
+                      {msg.fileUrl && (
+                        <div className="message-file">
+                          <a href={msg.fileUrl} download>
+                            {msg.fileName || 'Descargar archivo'}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-
-              {/* Nuevo mensaje */}
               <div className="new-message-area">
                 <label htmlFor="fileInput" className="attach-btn">
                   <i className="fa fa-paperclip" aria-hidden="true"></i>
@@ -207,7 +275,9 @@ function Messaging() {
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                 />
-                <button className="send-btn" onClick={handleSendMessage}>Enviar</button>
+                <button className="send-btn" onClick={handleSendMessage}>
+                  Enviar
+                </button>
               </div>
             </>
           ) : (
@@ -218,7 +288,7 @@ function Messaging() {
         </div>
       </main>
 
-      {/* Pie de página en morado */}
+      {/* Pie de página */}
       <footer className="footer-bar">
         <p>2025 © Iván Vela Campos</p>
       </footer>

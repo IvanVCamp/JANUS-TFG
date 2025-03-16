@@ -1,21 +1,25 @@
+// server.js
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 require('dotenv').config();
 
-// Crear la aplicación
 const app = express();
 
 // Conectar a la base de datos
 connectDB();
 
 // Middlewares
-app.use(express.json()); // Para parsear JSON
+app.use(express.json());
 app.use(cors());
 
-// Definir rutas
-app.use('/api/auth', require('./routes/auth.routes'));
+// Servir la carpeta 'uploads' como contenido estático para descargar archivos
+app.use('/uploads', express.static('uploads'));
 
-// Iniciar el servidor
+// Rutas del backend
+app.use('/api/auth', require('./routes/auth.routes'));
+app.use('/api/users', require('./routes/users.routes'));
+app.use('/api/chats', require('./routes/chats.routes'));
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
