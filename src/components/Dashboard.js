@@ -85,7 +85,7 @@ function Home() {
         <div className="calendar-and-buttons">
           {/* Bloque de botones (pegado al calendario) */}
           <div className="buttons-block">
-            <button className="option-btn btn-tareas">TAREAS PLANIFICADAS</button>
+            <button className="option-btn btn-tareas" onClick={() => navigate('/planner')}>TAREAS PLANIFICADAS</button>
             <button className="option-btn btn-recordatorios">RECORDATORIOS</button>
             {/* Al dar clic en FEEDBACK se redirige a la página de mensajería */}
             <button className="option-btn btn-feedback" onClick={() => navigate('/messaging')}>FEEDBACK</button>

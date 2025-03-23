@@ -11,13 +11,11 @@ exports.startChat = async (req, res) => {
   }
 
   try {
-    // Buscar si ya existe un chat entre el usuario actual y el usuario destino
     let chat = await Chat.findOne({ participants: { $all: [currentUserId, userId] } });
     if (!chat) {
       chat = new Chat({ participants: [currentUserId, userId] });
       await chat.save();
     }
-    // Poblamos la información de los participantes para enviar datos útiles al frontend
     chat = await Chat.findById(chat._id).populate('participants', 'nombre apellidos email');
     res.status(201).json(chat);
   } catch (err) {
@@ -29,7 +27,8 @@ exports.startChat = async (req, res) => {
 exports.getChats = async (req, res) => {
   const currentUserId = req.user.id;
   try {
-    const chats = await Chat.find({ participants: currentUserId }).populate('participants', 'nombre apellidos email');
+    const chats = await Chat.find({ participants: currentUserId })
+      .populate('participants', 'nombre apellidos email');
     res.json(chats);
   } catch (err) {
     console.error("Error in getChats:", err);
@@ -41,7 +40,6 @@ exports.getMessages = async (req, res) => {
   const currentUserId = req.user.id;
   const { chatId } = req.params;
   try {
-    // Verificar que el usuario esté en el chat
     const chat = await Chat.findById(chatId);
     if (!chat || !chat.participants.some(p => p.toString() === currentUserId)) {
       return res.status(403).json({ msg: 'No autorizado' });
@@ -61,24 +59,23 @@ exports.sendMessage = async (req, res) => {
   let fileUrl = null;
   let fileName = null;
 
-  // Si se ha subido un archivo, asignar URL y nombre
+  // Si hay archivo, asignar la URL completa
   if (req.file) {
-    fileUrl = `/uploads/${req.file.filename}`;
+    // Ajusta localhost:5000 si tu backend corre en otro host/puerto
+    fileUrl = `http://localhost:5000/uploads/${req.file.filename}`;
     fileName = req.file.originalname;
   }
 
   try {
-    // Verificar que el usuario actual forma parte del chat
     const chat = await Chat.findById(chatId);
     if (!chat || !chat.participants.some(p => p.toString() === currentUserId)) {
       return res.status(403).json({ msg: 'No autorizado' });
     }
 
-    // Crear y guardar el mensaje
     const message = new Message({
       chat: chatId,
       sender: currentUserId,
-      text: text || "",
+      text: text || "", // Permite enviar solo archivo
       fileUrl,
       fileName
     });

@@ -1,0 +1,233 @@
+/* taskPlanner.css */
+
+.task-planner-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f1f1f1;
+  }
+  
+  /* Barra superior */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #675af5;
+    color: #fff;
+    padding: 10px 20px;
+  }
+  
+  .user-icon {
+    font-size: 2rem;
+    margin-right: 10px;
+  }
+  
+  .title {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  
+  .bell-icon {
+    font-size: 1.4rem;
+    margin-right: 20px;
+    cursor: pointer;
+  }
+  
+  .logout-btn {
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 5px 8px;
+  }
+  
+  .logout-btn:hover {
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 4px;
+  }
+  
+  /* Barra de creación */
+  .create-task-bar {
+    padding: 10px 20px;
+    background-color: #fff;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .create-task-btn {
+    background-color: #8b77f7;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .create-task-btn:hover {
+    background-color: #7a69dd;
+  }
+  
+  /* Contenedor de slots */
+  .slots-container {
+    display: flex;
+    gap: 10px;
+    padding: 10px 20px;
+    flex: 1;
+    overflow-x: auto;
+  }
+  
+  /* Cada columna (slot) */
+  .slot-column {
+    background-color: #fff;
+    min-width: 180px;
+    max-width: 200px;
+    flex: 1 0 auto;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 160px);
+    /* Ajusta según la altura de tu header + create bar + footer */
+    overflow-y: auto;
+  }
+  
+  .slot-header {
+    background-color: #f3f3f3;
+    padding: 8px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+  }
+  
+  .slot-icon {
+    font-size: 1.2rem;
+    color: #675af5;
+  }
+  
+  .tasks-list {
+    flex: 1;
+    padding: 10px;
+  }
+  
+  /* Tarjeta de tarea */
+  .task-card {
+    background-color: #ebecf0;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    padding: 8px;
+    cursor: grab;
+    transition: box-shadow 0.2s;
+  }
+  
+  .task-card:hover {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  
+  .task-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  
+  .task-category {
+    font-size: 0.85rem;
+    color: #888;
+    margin: 4px 0;
+  }
+  
+  .task-desc {
+    font-size: 0.9rem;
+    margin: 0;
+  }
+  
+  /* Modal overlay */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Contenido del modal */
+  .modal-content {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    width: 400px;
+    max-width: 90%;
+  }
+  
+  .create-task-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .create-task-form label {
+    font-weight: 500;
+  }
+  
+  .create-task-form input,
+  .create-task-form select,
+  .create-task-form textarea {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  
+  .save-btn {
+    background-color: #675af5;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+  
+  .cancel-btn {
+    background-color: #eee;
+    color: #333;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+  
+  .save-btn:hover {
+    background-color: #574bd1;
+  }
+  
+  .cancel-btn:hover {
+    background-color: #ddd;
+  }
+  
+  /* Footer */
+  .footer-bar {
+    text-align: center;
+    background-color: #675af5;
+    color: #fff;
+    padding: 10px 0;
+  }
+  

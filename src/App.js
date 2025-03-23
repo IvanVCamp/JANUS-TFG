@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import Messaging from './components/Messaging';
+import TaskPlanner from './components/TaskPlanner';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/messaging" element={<Messaging />} /> 
+        <Route path="/planner" element={<TaskPlanner />} />
       </Routes>
     </Router>
   );

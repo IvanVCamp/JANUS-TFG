@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 
@@ -13,13 +15,21 @@ connectDB();
 app.use(express.json());
 app.use(cors());
 
-// Servir la carpeta 'uploads' como contenido estático para descargar archivos
+// Asegurar que la carpeta "uploads" exista
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
+// Servir la carpeta "uploads" de forma estática
 app.use('/uploads', express.static('uploads'));
 
-// Rutas del backend
+// Rutas
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/users', require('./routes/users.routes'));
 app.use('/api/chats', require('./routes/chats.routes'));
+app.use('/api/tasks', require('./routes/task.routes'));
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
