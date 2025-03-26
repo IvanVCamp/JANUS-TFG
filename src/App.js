@@ -7,6 +7,7 @@ import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import Messaging from './components/Messaging';
 import TaskPlanner from './components/TaskPlanner';
+import TimeMachineGame from './components/TimeMachineGame';
 
 function App() {
   return (
@@ -19,7 +20,8 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/messaging" element={<Messaging />} /> 
         <Route path="/planner" element={<TaskPlanner />} />
-      </Routes>
+        <Route path="/time-machine-game" element={<TimeMachineGame />} />
+        </Routes>
     </Router>
   );
 }

@@ -1,0 +1,178 @@
+/* timeMachineGame.css */
+.time-machine-game-container {
+  font-family: 'Poppins', sans-serif;
+  padding: 20px;
+  background-color: #fef9c3;
+  min-height: 100vh;
+}
+
+.tmg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffcc80;
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.tmg-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #bf360c;
+}
+
+.tmg-day-selector label {
+  margin-right: 10px;
+  font-weight: 600;
+  color: #bf360c;
+}
+
+.tmg-day-selector select {
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #bf360c;
+}
+
+.tmg-instructions {
+  background-color: rgba(255, 204, 128, 0.8);
+  border-left: 5px solid #bf360c;
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+  color: #bf360c;
+}
+
+.tmg-content {
+  display: flex;
+  gap: 20px;
+}
+
+.tmg-pool {
+  width: 30%;
+  background-color: #fff3e0;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.tmg-pool h2 {
+  text-align: center;
+  margin-bottom: 10px;
+  color: #e65100;
+}
+
+.tmg-activity-card {
+  background-color: #ffe0b2;
+  border: 1px solid #ffcc80;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  cursor: grab;
+  transition: transform 0.2s;
+}
+
+.tmg-activity-card:hover {
+  transform: scale(1.02);
+}
+
+.tmg-activity-icon {
+  font-size: 1.5rem;
+  margin-right: 10px;
+}
+
+.tmg-activity-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e65100;
+}
+
+.tmg-board {
+  width: 70%;
+  background-color: #fff8e1;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.tmg-board h2 {
+  text-align: center;
+  margin-bottom: 10px;
+  color: #e65100;
+}
+
+.tmg-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tmg-slot {
+  background-color: #fff;
+  border: 1px dashed #ffcc80;
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.tmg-slot-header {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #bf360c;
+}
+
+.tmg-slot-body {
+  min-height: 50px;
+}
+
+.tmg-slot-activity {
+  background-color: #ffe0b2;
+  border: 1px solid #ffcc80;
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.tmg-slot-activity-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.tmg-duration-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tmg-duration-control input[type="range"] {
+  width: 100%;
+}
+
+.tmg-actions {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.tmg-save-btn {
+  background-color: #ffcc80;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #bf360c;
+  transition: background-color 0.3s;
+}
+
+.tmg-save-btn:hover {
+  background-color: #ffe0b2;
+}
