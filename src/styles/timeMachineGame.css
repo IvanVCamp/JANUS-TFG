@@ -176,3 +176,34 @@
 .tmg-save-btn:hover {
   background-color: #ffe0b2;
 }
+
+/* Estilos para el botón de volver al Dashboard */
+.back-dashboard-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.8rem;
+  color: #fff;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: transform 0.2s;
+}
+
+.back-dashboard-btn:hover {
+  transform: translateX(-5px);
+}
+
+/* Ajustes para la cabecera */
+.tmg-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #ffcc80;
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.tmg-header-left {
+  display: flex;
+  align-items: center;
+}

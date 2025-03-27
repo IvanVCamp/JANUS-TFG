@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import chatService from '../services/chatService';
 import '../styles/messaging.css';
-import { jwtDecode } from 'jwt-decode';
 
 function Messaging() {
   const navigate = useNavigate();
@@ -23,14 +22,14 @@ function Messaging() {
   const [newMessage, setNewMessage] = useState('');
   const [file, setFile] = useState(null);
 
-  // **Vista previa** del archivo (nombre, tamaño, tipo, url, etc.)
+  // Vista previa del archivo
   const [filePreview, setFilePreview] = useState(null);
 
-  // Decodificar el token para obtener el ID del usuario
+  // Decodificar el token para obtener el ID del usuario (simplificado)
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      const decoded = jwtDecode(token);
+      const decoded = JSON.parse(atob(token.split('.')[1])); 
       setCurrentUserId(decoded.user?.id);
     }
   }, []);
@@ -48,7 +47,7 @@ function Messaging() {
     fetchChats();
   }, []);
 
-  // Cargar los mensajes al seleccionar un chat
+  // Cargar mensajes al seleccionar un chat
   useEffect(() => {
     if (selectedChatId) {
       async function fetchMessages() {
@@ -83,12 +82,10 @@ function Messaging() {
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery]);
 
-  // Manejar cambios en el input de búsqueda
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  // Al seleccionar un usuario del dropdown, iniciar/abrir chat
   const handleSelectUser = async (user) => {
     try {
       const newChat = await chatService.startChat(user._id);
@@ -101,61 +98,41 @@ function Messaging() {
     }
   };
 
-  // Al adjuntar un archivo
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const selectedFile = e.target.files[0];
       setFile(selectedFile);
-
-      // Crear un objectURL para vista previa (solo útil si es imagen, pero puede servir de icono)
       const previewURL = URL.createObjectURL(selectedFile);
-
-      // Calcular tamaño en KB
       const sizeKB = (selectedFile.size / 1024).toFixed(1);
-
-      // Guardar datos en filePreview
       setFilePreview({
         name: selectedFile.name,
         sizeKB,
         type: selectedFile.type,
         previewURL
       });
-
-      // Limpiar el texto del mensaje (lo usaremos como comentario)
       setNewMessage('');
     }
   };
 
-  // Cancelar la vista previa
   const handleCancelPreview = () => {
     setFile(null);
     setFilePreview(null);
-    setNewMessage(''); // Limpia el comentario
+    setNewMessage('');
   };
 
-  // Enviar mensaje (archivo + comentario opcional)
   const handleSendMessage = async () => {
     if (!selectedChatId) return;
-
-    // Permitir enviar aunque no haya texto si hay archivo
     if (!file && !newMessage.trim()) return;
 
     try {
       const formData = new FormData();
       formData.append('text', newMessage);
-      if (file) {
-        formData.append('file', file);
-      }
-
+      if (file) formData.append('file', file);
       const msgCreated = await chatService.sendMessage(selectedChatId, formData);
       setMessages(prev => [...prev, msgCreated]);
-
-      // Limpiar
       setNewMessage('');
       setFile(null);
       setFilePreview(null);
-
-      // Actualizar el lastMessage
       setChats(prevChats =>
         prevChats.map(c =>
           (c._id === selectedChatId || c.id === selectedChatId)
@@ -168,27 +145,28 @@ function Messaging() {
     }
   };
 
-  // Cerrar sesión
   const handleLogout = () => {
     navigate('/');
   };
 
-  // Encontrar el otro participante del chat
+  // Botón para regresar al Dashboard
+  const handleGoDashboard = () => {
+    navigate('/dashboard');
+  };
+
   const getOtherParticipant = (chat) => {
     if (!chat.participants || !currentUserId) return null;
     return chat.participants.find(p => p._id !== currentUserId);
   };
 
-  // Renderizar la lista de chats
   const renderChatList = () => {
     if (chats.length === 0) {
       return (
         <div className="no-chats">
-          <p>Comienza a conversar ahora con tus especialistas! <span>😊</span></p>
+          <p>Comienza a conversar ahora con tus especialistas! 😊</p>
         </div>
       );
     }
-
     return (
       <ul className="chat-list">
         {chats.map((chat) => {
@@ -221,43 +199,30 @@ function Messaging() {
     );
   };
 
-  // Vista previa del archivo (similar a WhatsApp)
   const renderFilePreview = () => {
     if (!filePreview) return null;
-
     const isImage = filePreview.type.startsWith('image/');
-
     return (
       <div className="file-preview-container">
-        {/* Vista preliminar si es imagen */}
         {isImage ? (
           <img src={filePreview.previewURL} alt="Vista previa" className="file-preview-image" />
         ) : (
           <div className="file-preview-placeholder">
-            {/* Podrías mostrar un ícono PDF, DOC, etc. */}
             <i className="fa fa-file-pdf-o" aria-hidden="true"></i>
           </div>
         )}
-
         <p className="file-preview-name">
           {filePreview.name} ({filePreview.sizeKB} KB)
         </p>
-
-        {/* Campo de comentario opcional */}
         <textarea
           className="file-preview-comment"
           placeholder="Comentario (opcional)"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
         />
-
         <div className="file-preview-buttons">
-          <button onClick={handleCancelPreview} className="btn-cancel">
-            Cancelar
-          </button>
-          <button onClick={handleSendMessage} className="btn-send">
-            Enviar
-          </button>
+          <button onClick={handleCancelPreview} className="btn-cancel">Cancelar</button>
+          <button onClick={handleSendMessage} className="btn-send">Enviar</button>
         </div>
       </div>
     );
@@ -267,6 +232,7 @@ function Messaging() {
     <div className="messaging-container">
       <header className="top-bar">
         <div className="left-section">
+          <button className="back-dashboard-btn" onClick={handleGoDashboard}>←</button>
           <i className="fa fa-user-circle user-icon" aria-hidden="true"></i>
         </div>
         <div className="center-section">
@@ -310,7 +276,6 @@ function Messaging() {
             <>
               <div className="messages-area">
                 {messages.map((msg, idx) => {
-                  // Determinar si el mensaje es saliente o entrante
                   const isOutgoing = msg.sender?._id === currentUserId || msg.sender === currentUserId;
                   return (
                     <div
@@ -329,12 +294,7 @@ function Messaging() {
                   );
                 })}
               </div>
-
-              {/* Si hay filePreview, mostramos la vista previa a pantalla completa (ocultando el input normal) */}
-              {filePreview ? (
-                renderFilePreview()
-              ) : (
-                // Si no hay vista previa, mostramos el input normal (sin imagen)
+              {filePreview ? renderFilePreview() : (
                 <div className="new-message-area">
                   <label htmlFor="fileInput" className="attach-btn">
                     <i className="fa fa-paperclip" aria-hidden="true"></i>

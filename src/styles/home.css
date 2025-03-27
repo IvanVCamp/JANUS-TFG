@@ -1,42 +1,11 @@
 /* home.css */
 
-/* Fuente y reset */
-* {
-  font-family: 'Poppins', sans-serif;
-  box-sizing: border-box;
-}
-
-body, html {
-  margin: 0;
-  padding: 0;
-  background-color: #e0e0e0; /* Fondo gris */
-}
-
+/* Contenedor principal */
 .home-container {
-  position: relative;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-}
-
-/* Overlay para el mensaje de logout */
-.logout-message-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.logout-message-overlay p {
-  color: #fff;
-  font-size: 1.5rem;
-  font-weight: bold;
+  background-color: #e0e0e0; /* Fondo gris */
 }
 
 /* Barra superior */
@@ -97,6 +66,7 @@ body, html {
 
 /* Contenido principal */
 .main-content {
+  flex: 1;
   width: 90%;
   max-width: 1200px;
   margin: 20px auto;
@@ -105,112 +75,82 @@ body, html {
   gap: 20px;
 }
 
-/* Contenedor horizontal para el bloque de botones y el calendario */
-.calendar-and-buttons {
+/* Sección de bienvenida */
+.intro-section {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.intro-section h2 {
+  margin: 0 0 10px;
+}
+
+/* Contenedor para los botones y el calendario */
+.buttons-and-calendar {
   display: flex;
-  justify-content: center;  /* Centra horizontalmente */
-  align-items: center;      /* Alinea verticalmente al centro */
   gap: 20px;
 }
 
-/* Bloque con los 3 botones */
+/* Bloque de botones */
 .buttons-block {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  flex: 1;
 }
 
-/* Botones: mayor longitud y estilo */
 .option-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #7c63f6;
   color: #fff;
   border: none;
-  padding: 15px 30px;
-  text-align: center;
+  border-radius: 8px;
+  padding: 15px;
   font-size: 1rem;
   font-weight: 600;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   cursor: pointer;
-  transition: transform 0.2s ease;
-  min-width: 260px;
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .option-btn:hover {
+  background-color: #6b55d7;
   transform: translateY(-2px);
 }
 
-.btn-tareas {
-  background-color: #4CAF50; /* Verde */
-}
-.btn-recordatorios {
-  background-color: #FFC107; /* Amarillo */
-  color: #333;
-}
-.btn-feedback {
-  background-color: #F44336; /* Rojo */
+/* Botones deshabilitados (futuras funcionalidades) */
+.option-btn.disabled-btn {
+  background-color: #ccc;
+  color: #555;
+  cursor: not-allowed;
 }
 
-/* Caja del calendario */
-.calendar-box {
+/* Ícono en cada botón */
+.icon {
+  font-size: 1.2rem;
+}
+
+/* Calendario */
+.calendar-block {
+  flex: 1;
   background-color: #fff;
-  padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-/* Indicador de actividades en el calendario */
-.task-dot {
-  width: 6px;
-  height: 6px;
-  background-color: red;
-  border-radius: 50%;
-  margin: 0 auto;
-  margin-top: 3px;
-}
-
-/* Lista de tareas */
-.tasks-list {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-.tasks-list h3 {
-  margin-top: 0;
-}
-
-/* Sección de bienvenida */
-.welcome-section {
-  width: 90%;
-  max-width: 1200px;
-  margin: 0 auto 20px;
-  background-color: #fff;
   padding: 20px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  border-radius: 8px;
-  text-align: center;
-}
-
-.welcome-section h2 {
-  margin: 0 0 10px;
-}
-
-.welcome-section p {
-  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Pie de página */
 .footer-bar {
-  margin-top: auto;
   text-align: center;
   background-color: #6c63ff;
   color: #fff;
   padding: 10px 0;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.3);
-}
-
-.footer-bar p {
-  margin: 0;
-  font-size: 0.9rem;
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.3);
 }

@@ -13,36 +13,31 @@ function Register() {
     email: '',
     password: '',
     confirmPassword: '',
-    role: ''  // Inicialmente vacío; el usuario debe seleccionarlo
+    role: ''
   });
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Manejo de inputs de texto
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Manejo del dropdown para roles
   const handleSelectChange = (e) => {
     setFormData({ ...formData, role: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Validar que el usuario haya seleccionado un rol
-    if (!formData.role || formData.role.trim() === '') {
-      setError('Debes seleccionar un rol');
-      return;
-    }
+    setError('');
+    setSuccess('');
+
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden');
       return;
     }
+
     try {
-      // Opcional: depurar y ver qué se envía
-      console.log("Datos enviados:", formData);
       await authService.register(formData);
       setSuccess('Registro exitoso, ya puedes iniciar sesión.');
       setTimeout(() => {
@@ -57,9 +52,12 @@ function Register() {
     <div className="register-container">
       <form onSubmit={handleSubmit} className="register-form">
         <h2 className="form-title">Crear Cuenta</h2>
+
+        {/* Mensajes de error/éxito (ocupan 2 columnas) */}
         {error && <p className="error">{error}</p>}
         {success && <p className="success">{success}</p>}
 
+        {/* Campo: Nombre */}
         <div className="input-wrapper">
           <label htmlFor="nombre">Nombre:</label>
           <input
@@ -73,44 +71,7 @@ function Register() {
           />
         </div>
 
-        <div className="input-wrapper">
-          <label htmlFor="apellidos">Apellidos:</label>
-          <input
-            type="text"
-            name="apellidos"
-            id="apellidos"
-            placeholder="Tus apellidos"
-            value={formData.apellidos}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="input-wrapper">
-          <label htmlFor="fechaNacimiento">Fecha de Nacimiento:</label>
-          <input
-            type="date"
-            name="fechaNacimiento"
-            id="fechaNacimiento"
-            value={formData.fechaNacimiento}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="input-wrapper">
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            name="email"
-            id="email"
-            placeholder="example@gmail.com"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
+        {/* Campo: Contraseña */}
         <div className="input-wrapper">
           <label htmlFor="password">Contraseña:</label>
           <input
@@ -124,6 +85,21 @@ function Register() {
           />
         </div>
 
+        {/* Campo: Apellidos */}
+        <div className="input-wrapper">
+          <label htmlFor="apellidos">Apellidos:</label>
+          <input
+            type="text"
+            name="apellidos"
+            id="apellidos"
+            placeholder="Tus apellidos"
+            value={formData.apellidos}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        {/* Campo: Confirmar Contraseña */}
         <div className="input-wrapper">
           <label htmlFor="confirmPassword">Confirmar Contraseña:</label>
           <input
@@ -137,9 +113,23 @@ function Register() {
           />
         </div>
 
+        {/* Campo: Fecha de Nacimiento */}
+        <div className="input-wrapper">
+          <label htmlFor="fechaNacimiento">Fecha de Nacimiento:</label>
+          <input
+            type="date"
+            name="fechaNacimiento"
+            id="fechaNacimiento"
+            value={formData.fechaNacimiento}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        {/* Campo: Rol */}
         <div className="input-wrapper roles-wrapper">
           <label htmlFor="role">Rol:</label>
-          <select 
+          <select
             name="role"
             id="role"
             value={formData.role}
@@ -147,7 +137,7 @@ function Register() {
             className="styled-dropdown"
             required
           >
-            <option value="">Seleccione un rol</option>
+            <option value="">Selecciona un rol</option>
             <option value="Padre">Padre</option>
             <option value="paciente">Paciente</option>
             <option value="terapeuta">Terapeuta</option>
@@ -155,11 +145,32 @@ function Register() {
           </select>
         </div>
 
-        <button type="submit" className="register-btn">Registrar</button>
+        {/* Campo: Email */}
+        <div className="input-wrapper">
+          <label htmlFor="email">Email:</label>
+          <input
+            type="email"
+            name="email"
+            id="email"
+            placeholder="example@gmail.cc"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        {/* Botón de Registrar */}
+        <div className="button-wrapper">
+          <button type="submit" className="register-btn">Registrar</button>
+        </div>
+
+        {/* Enlace para iniciar sesión */}
+        <div className="login-link-wrapper">
+          <p>
+            ¿Ya tienes cuenta? <a href="/">Inicia sesión</a>
+          </p>
+        </div>
       </form>
-      <p className="login-link">
-        ¿Ya tienes una cuenta? <a href="/">Inicia sesión</a>
-      </p>
     </div>
   );
 }

@@ -4,65 +4,24 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import '../styles/home.css';
 
-/**
- * Formatea una fecha en formato YYYY-MM-DD.
- */
-function formatDate(date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
 function Home() {
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Simulamos datos del usuario
-  const user = { name: 'Juan' };
-
-  // Simulamos actividades agendadas: claves en formato YYYY-MM-DD
-  const tasksByDate = {
-    '2025-03-13': ['Ir al médico', 'Enviar correo a Pedro'],
-    '2025-03-15': ['Comprar regalo', 'Llamar a Juan'],
-  };
-
+  // Manejar cambio de fecha en el calendario
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
 
-  // Función para renderizar un puntito rojo en el calendario si hay actividades en ese día
-  const renderTileContent = ({ date, view }) => {
-    if (view === 'month') {
-      const dateStr = formatDate(date);
-      if (tasksByDate[dateStr]) {
-        return <div className="task-dot"></div>;
-      }
-    }
-    return null;
-  };
-
-  // Al hacer clic en cerrar sesión se muestra el overlay y se redirige después de 2 segundos
+  // Ejemplo de logout (redirige a la pantalla de login)
   const handleLogout = () => {
-    setIsLoggingOut(true);
-    setTimeout(() => {
-      navigate('/');
-    }, 2000);
+    // Lógica para logout, p.ej. limpiar token, etc.
+    navigate('/');
   };
-
-  const selectedDateStr = formatDate(selectedDate);
-  const tasksForSelectedDate = tasksByDate[selectedDateStr] || [];
 
   return (
     <div className="home-container">
-      {isLoggingOut && (
-        <div className="logout-message-overlay">
-          <p>¡Adiós, {user.name}! ¡Vuelve pronto por aquí!</p>
-        </div>
-      )}
-
-      {/* Barra superior */}
+      {/* Cabecera similar a la del Dashboard/Mensajería */}
       <header className="top-bar">
         <div className="left-section">
           <i className="fa fa-user-circle user-icon" aria-hidden="true"></i>
@@ -74,57 +33,57 @@ function Home() {
           <i className="fa fa-bell bell-icon" aria-hidden="true"></i>
           <button className="logout-btn" onClick={handleLogout}>
             <i className="fa fa-sign-out" aria-hidden="true"></i>
-            <span>Cerrar Sesión</span>
+            <span>Salir</span>
           </button>
         </div>
       </header>
 
       {/* Contenido principal */}
       <main className="main-content">
-        {/* Contenedor horizontal para el bloque de botones y el calendario */}
-        <div className="calendar-and-buttons">
-          {/* Bloque de botones (pegado al calendario) */}
-          <div className="buttons-block">
-            <button className="option-btn btn-tareas" onClick={() => navigate('/planner')}>TAREAS PLANIFICADAS</button>
-            <button className="option-btn btn-recordatorios">RECORDATORIOS</button>
-            {/* Al dar clic en FEEDBACK se redirige a la página de mensajería */}
-            <button className="option-btn btn-feedback" onClick={() => navigate('/messaging')}>FEEDBACK</button>
-          </div>
-          {/* Calendario real con puntitos rojos si hay actividades */}
-          <div className="calendar-box">
-            <Calendar
-              onChange={handleDateChange}
-              value={selectedDate}
-              tileContent={renderTileContent}
-            />
-          </div>
-        </div>
+        {/* Sección de bienvenida */}
+        <section className="intro-section">
+          <h2>¡Bienvenido/a a JANUS!</h2>
+          <p>Explora las distintas opciones que tenemos para ti. Elige una sección o revisa el calendario.</p>
+        </section>
 
-        {/* Lista de tareas debajo del bloque */}
-        <div className="tasks-list">
-          <h3>Tareas para {selectedDateStr}</h3>
-          {tasksForSelectedDate.length === 0 ? (
-            <p>No hay tareas para este día</p>
-          ) : (
-            <ul>
-              {tasksForSelectedDate.map((task, idx) => (
-                <li key={idx}>{task}</li>
-              ))}
-            </ul>
-          )}
+        <div className="buttons-and-calendar">
+          {/* Bloque con los 5 botones */}
+          <div className="buttons-block">
+            <button className="option-btn" onClick={() => navigate('/messaging')}>
+              <i className="fa fa-comments icon" aria-hidden="true"></i>
+              Mensajería
+            </button>
+
+            <button className="option-btn" onClick={() => navigate('/time-machine-game')}>
+              <i className="fa fa-clock-o icon" aria-hidden="true"></i>
+              Máquina del Tiempo
+            </button>
+
+            {/* Tres botones futuros, deshabilitados por ahora */}
+            <button className="option-btn disabled-btn">
+              <i className="fa fa-globe icon" aria-hidden="true"></i>
+              Mi Planeta
+            </button>
+
+            <button className="option-btn disabled-btn">
+              <i className="fa fa-rocket icon" aria-hidden="true"></i>
+              Misión: Yo puedo
+            </button>
+
+            <button className="option-btn disabled-btn">
+              <i className="fa fa-book icon" aria-hidden="true"></i>
+              Mi diario de emociones
+            </button>
+          </div>
+
+          {/* Calendario interactivo */}
+          <div className="calendar-block">
+            <Calendar onChange={handleDateChange} value={selectedDate} />
+          </div>
         </div>
       </main>
 
-      {/* Sección de bienvenida */}
-      <section className="welcome-section">
-        <h2>¡BIENVENIDO A JANUS!</h2>
-        <p>
-          Una aplicación destinada a ayudarte de la mejor manera posible con tus
-          problemas de administración y balance de tareas.
-        </p>
-      </section>
-
-      {/* Pie de página */}
+      {/* Pie de página similar al de otras pantallas */}
       <footer className="footer-bar">
         <p>2025 © Iván Vela Campos</p>
       </footer>

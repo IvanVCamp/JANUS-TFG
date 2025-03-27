@@ -1,5 +1,18 @@
 /* messaging.css */
 
+.back-dashboard-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #fff;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: transform 0.2s;
+}
+
+.back-dashboard-btn:hover {
+  transform: translateX(-5px);
+}
 /* Contenedor principal del componente */
 .messaging-container {
   display: flex;

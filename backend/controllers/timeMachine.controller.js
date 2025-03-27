@@ -1,4 +1,4 @@
-const GameResult = require('../models/GameResult');
+const GameResult = require('../models/TimeMachineResult');
 
 exports.createGameResult = async (req, res) => {
   const { day, timeSlots } = req.body;

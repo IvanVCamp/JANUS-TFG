@@ -1,0 +1,156 @@
+/* emotionsDiary.css */
+.emotions-diary-container {
+    font-family: 'Poppins', sans-serif;
+    padding: 20px;
+    background-color: #fce4ec; /* fondo pastel */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .ed-header {
+    background-color: #ff80ab;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .ed-header-left {
+    display: flex;
+    align-items: center;
+  }
+  
+  .back-dashboard-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.8rem;
+    color: #fff;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: transform 0.2s;
+  }
+  
+  .back-dashboard-btn:hover {
+    transform: translateX(-5px);
+  }
+  
+  .ed-instructions {
+    background-color: rgba(255, 128, 171, 0.8);
+    border-left: 5px solid #ff4081;
+    padding: 15px;
+    border-radius: 4px;
+    margin: 20px 0;
+    text-align: center;
+    font-size: 1.2rem;
+    color: #d81b60;
+  }
+  
+  .ed-main {
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .activities-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .activity-slot {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  
+  .activity-slot h3 {
+    margin: 0 0 10px;
+    color: #d81b60;
+  }
+  
+  .activities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  .activity-card {
+    background-color: #ffe0f0;
+    border-radius: 8px;
+    padding: 10px;
+    width: 200px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .activity-info {
+    text-align: center;
+  }
+  
+  .activity-icon {
+    font-size: 2rem;
+  }
+  
+  .activity-title {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #bf0040;
+  }
+  
+  .emotion-options {
+    display: flex;
+    gap: 5px;
+  }
+  
+  .emotion-btn {
+    background-color: #fff;
+    border: 1px solid #ff80ab;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+  }
+  
+  .emotion-btn.selected,
+  .emotion-btn:hover {
+    background-color: #ff80ab;
+    color: #fff;
+    transform: scale(1.1);
+  }
+  
+  .ed-actions {
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  .ed-save-btn {
+    background-color: #ff80ab;
+    color: #fff;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .ed-save-btn:hover {
+    background-color: #e04081;
+  }
+  
+  .footer-bar {
+    text-align: center;
+    background-color: #ff80ab;
+    color: #fff;
+    padding: 10px 0;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.3);
+  }
+  

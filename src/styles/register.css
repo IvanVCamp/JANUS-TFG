@@ -1,34 +1,42 @@
 /* register.css */
 
-/* Contenedor principal */
 .register-container {
-  width: 90%;
-  max-width: 400px;
-  margin: 40px auto;
+  /* Ocupa todo el ancho, sin márgenes laterales */
+  width: 100%;
+  margin: 30px 0;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: center; /* Centra el formulario horizontalmente */
 }
 
-/* Formulario */
+/* Formulario con grid para 2 columnas y 5 filas (o las que necesites) */
 .register-form {
-  width: 100%;
-  background-color: #fff; /* Ajusta a tu gusto */
-  padding: 20px;
+  width: 90%;              /* Ajusta si deseas más o menos ancho total */
+  max-width: 1200px;       /* Evita que se exceda demasiado en pantallas grandes */
+  background-color: #fff;
+  padding: 20px 30px;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
+
+  display: grid;
+  grid-template-columns: 1fr 1fr; 
+  /* Ajusta cuántas filas necesitas para acomodar todos los campos. */
+  grid-template-rows: auto auto auto auto auto; 
+  column-gap: 40px; /* Separación horizontal entre columnas */
+  row-gap: 20px;    /* Separación vertical entre filas */
 }
 
-/* Título del formulario */
+/* Título del formulario: ocupa 2 columnas */
 .form-title {
-  margin: 0 0 20px 0;
+  grid-column: 1 / 3;
   text-align: center;
+  margin: 0 0 10px 0;
   font-size: 1.5rem;
   color: #333;
 }
 
-/* Mensajes de error o éxito */
-.error {
+/* Mensajes de error o éxito: también ocupa 2 columnas */
+.error, .success {
+  grid-column: 1 / 3;
   background-color: #ffe0e0;
   color: #c0392b;
   padding: 10px;
@@ -40,34 +48,46 @@
 .success {
   background-color: #e0ffe0;
   color: #27ae60;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 4px;
-  text-align: center;
 }
 
-/* Cada campo (label + input) */
+/* Cada campo (label + input) ocupa 1 celda de la grid */
 .input-wrapper {
   display: flex;
-  flex-direction: column; /* Label encima del input */
-  margin-bottom: 15px;
+  flex-direction: column;
 }
 
 .input-wrapper label {
   margin-bottom: 5px;
-  font-weight: 500;  /* Un poco más de énfasis en el texto del label */
+  font-weight: 500;
 }
 
-.input-wrapper input {
+.input-wrapper input,
+.input-wrapper select {
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 10px;
   font-size: 0.95rem;
+  width: 100%;  /* Campos más anchos */
+}
+
+/* Dropdown estilizado */
+.styled-dropdown {
+  appearance: none;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236c63ff'><path d='M6 9L2 5h8z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  cursor: pointer;
 }
 
 /* Botón de registro */
+.button-wrapper {
+  display: flex;
+  align-items: flex-end; /* Botón abajo en la celda */
+}
+
 .register-btn {
-  width: 100%;
   background-color: #7c63f6;
   color: #fff;
   padding: 12px;
@@ -75,48 +95,38 @@
   border-radius: 4px;
   font-size: 1rem;
   cursor: pointer;
-  margin-top: 10px;
   transition: background-color 0.3s ease;
+  width: 100%;
 }
 
 .register-btn:hover {
   background-color: #6b55d7;
 }
 
-/* Enlace a login */
-.login-link {
+/* Enlace para iniciar sesión (ocupa 2 columnas) */
+.login-link-wrapper {
+  grid-column: 1 / 3;
   text-align: center;
-  font-size: 0.9rem;
 }
 
-.login-link a {
+.login-link-wrapper a {
   color: #7c63f6;
   text-decoration: none;
 }
 
-.login-link a:hover {
-  text-decoration: underline;
+/* Responsive: en pantallas pequeñas, 1 columna */
+@media (max-width: 768px) {
+  .register-form {
+    grid-template-columns: 1fr; 
+    grid-template-rows: auto;
+  }
+  .form-title,
+  .error,
+  .success,
+  .login-link-wrapper {
+    grid-column: 1;
+  }
+  .button-wrapper {
+    align-items: center;
+  }
 }
-
-/* Estilos para el dropdown estilizado */
-.styled-dropdown {
-  width: 100%;
-  padding: 10px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #fff;
-  appearance: none; /* Quitar estilos por defecto en algunos navegadores */
-  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="%236c63ff"><path d="M6 9L2 5h8z"/></svg>');
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 12px;
-  cursor: pointer;
-  transition: border-color 0.2s ease;
-}
-
-.styled-dropdown:focus {
-  border-color: #6c63ff;
-  outline: none;
-}
-

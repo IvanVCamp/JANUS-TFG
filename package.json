@@ -4,6 +4,7 @@
   "description": "Frontend para el sistema de gestión de credenciales",
   "private": true,
   "main": "App.js",
+  "proxy": "http://localhost:5000",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

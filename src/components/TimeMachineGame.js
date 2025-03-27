@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-// Cambiamos el import:
+import React, { useState, useEffect } from 'react';
+// Usamos el fork mantenido de react-beautiful-dnd:
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import '../styles/timeMachineGame.css';
 
 const initialActivities = [
@@ -37,20 +38,43 @@ const generateTimeSlots = () => {
 };
 
 function TimeMachineGame() {
+  const navigate = useNavigate();
   const [selectedDay, setSelectedDay] = useState('Miércoles');
   const [poolActivities] = useState(initialActivities);
   const [timeSlots, setTimeSlots] = useState(generateTimeSlots());
 
+  // Verifica la existencia del token; si no existe, redirige al login
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/');
+    }
+  }, [navigate]);
+
   const handleDayChange = (e) => setSelectedDay(e.target.value);
 
+  const handleGoDashboard = () => {
+    navigate('/dashboard');
+  };
+
   const onDragEnd = (result) => {
-    const { source, destination, draggableId, combine } = result;
-    if (!destination && !combine) return;
+    const { source, destination, draggableId } = result;
+    if (!destination) return;
 
-    // Ejemplo: si no quieres permitir "soltar en el pool":
-    // if (destination && destination.droppableId === 'pool') return;
+    // 1. Si se suelta en el pool, eliminamos el elemento si proviene de un slot.
+    if (destination.droppableId === 'pool') {
+      if (source.droppableId !== 'pool') {
+        const newSlots = [...timeSlots];
+        const sourceSlotIndex = newSlots.findIndex(slot => slot.id === source.droppableId);
+        if (sourceSlotIndex !== -1) {
+          newSlots[sourceSlotIndex].activities.splice(source.index, 1);
+          setTimeSlots(newSlots);
+        }
+      }
+      return;
+    }
 
-    // Si viene del pool, se crea una "copia" en el slot
+    // 2. Si el elemento viene del pool, lo copiamos al slot.
     if (source.droppableId === 'pool') {
       const originalId = draggableId.replace('pool-', '');
       const activity = poolActivities.find(act => act.id === originalId);
@@ -68,35 +92,14 @@ function TimeMachineGame() {
       return;
     }
 
-    // Para elementos ya en el board:
-    if (combine) {
-      // Combinar tarjetas
-      const newSlots = [...timeSlots];
-      const targetInstanceId = combine.draggableId;
-      const targetSlotIndex = newSlots.findIndex(slot =>
-        slot.activities.some(act => act.instanceId === targetInstanceId)
-      );
-      if (targetSlotIndex === -1) return;
-      const targetIndex = newSlots[targetSlotIndex].activities.findIndex(
-        act => act.instanceId === targetInstanceId
-      );
-      const sourceSlotIndex = newSlots.findIndex(slot => slot.id === source.droppableId);
-      if (sourceSlotIndex === -1) return;
-      const [movedItem] = newSlots[sourceSlotIndex].activities.splice(source.index, 1);
-      newSlots[targetSlotIndex].activities.splice(targetIndex + 1, 0, movedItem);
-      setTimeSlots(newSlots);
-      return;
-    } else {
-      // Movimiento normal entre slots
-      const newSlots = [...timeSlots];
-      const sourceSlotIndex = newSlots.findIndex(slot => slot.id === source.droppableId);
-      const destinationSlotIndex = newSlots.findIndex(slot => slot.id === destination.droppableId);
-      if (sourceSlotIndex === -1 || destinationSlotIndex === -1) return;
-      const [movedItem] = newSlots[sourceSlotIndex].activities.splice(source.index, 1);
-      newSlots[destinationSlotIndex].activities.splice(destination.index, 0, movedItem);
-      setTimeSlots(newSlots);
-      return;
-    }
+    // 3. Movimiento normal entre slots.
+    const newSlots = [...timeSlots];
+    const sourceSlotIndex = newSlots.findIndex(slot => slot.id === source.droppableId);
+    const destinationSlotIndex = newSlots.findIndex(slot => slot.id === destination.droppableId);
+    if (sourceSlotIndex === -1 || destinationSlotIndex === -1) return;
+    const [movedItem] = newSlots[sourceSlotIndex].activities.splice(source.index, 1);
+    newSlots[destinationSlotIndex].activities.splice(destination.index, 0, movedItem);
+    setTimeSlots(newSlots);
   };
 
   const handleDurationChange = (slotId, instanceId, newDuration) => {
@@ -115,13 +118,25 @@ function TimeMachineGame() {
   };
 
   const handleSaveResult = async () => {
+    const token = localStorage.getItem('token');
     const payload = {
       day: selectedDay,
-      timeSlots: timeSlots.filter(slot => slot.activities.length > 0)
+      timeSlots: timeSlots
+        .filter(slot => slot.activities.length > 0)
+        .map(slot => ({
+          slot: slot.id,
+          activities: slot.activities.map(act => ({
+            activityId: act.id,
+            title: act.title,
+            icon: act.icon,
+            slot: slot.id,
+            duration: act.duration
+          }))
+        }))
     };
     try {
-      await axios.post('/api/game', payload, {
-        headers: { 'x-auth-token': localStorage.getItem('token') }
+      await axios.post('http://localhost:5000/api/game', payload, {
+        headers: { 'x-auth-token': token }
       });
       alert('¡Tu día ha sido guardado!');
     } catch (err) {
@@ -133,7 +148,10 @@ function TimeMachineGame() {
   return (
     <div className="time-machine-game-container">
       <header className="tmg-header">
-        <h1>La Máquina del Tiempo</h1>
+        <div className="tmg-header-left">
+          <button className="back-dashboard-btn" onClick={handleGoDashboard}>←</button>
+          <h1>La Máquina del Tiempo</h1>
+        </div>
         <div className="tmg-day-selector">
           <label htmlFor="day-select">Elige un día:</label>
           <select id="day-select" value={selectedDay} onChange={handleDayChange}>
@@ -207,7 +225,7 @@ function TimeMachineGame() {
               {timeSlots.map(slot => (
                 <div key={slot.id} className="tmg-slot">
                   <div className="tmg-slot-header">{slot.id}</div>
-                  <Droppable droppableId={slot.id} isCombineEnabled={true}>
+                  <Droppable droppableId={slot.id} isCombineEnabled={false}>
                     {(provided) => (
                       <div
                         className="tmg-slot-body"
@@ -215,11 +233,7 @@ function TimeMachineGame() {
                         {...provided.droppableProps}
                       >
                         {slot.activities.map((act, index) => (
-                          <Draggable
-                            key={act.instanceId}
-                            draggableId={act.instanceId}
-                            index={index}
-                          >
+                          <Draggable key={act.instanceId} draggableId={act.instanceId} index={index}>
                             {(providedDraggable) => (
                               <div
                                 className="tmg-slot-activity"
