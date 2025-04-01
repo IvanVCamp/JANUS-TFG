@@ -26,20 +26,31 @@ function MiPlaneta() {
   const [zoom, setZoom] = useState(1);
   const navigate = useNavigate();
 
-  // Inicia el drag desde el panel lateral
+  // Inicia el drag desde el panel lateral, usando "text/plain" para asegurar la transferencia
   const handleDragStart = (e, element) => {
-    e.dataTransfer.setData("element", JSON.stringify(element));
+    e.dataTransfer.setData("text/plain", JSON.stringify(element));
   };
 
-  // Añade el elemento soltado en el área del planeta, con posición y tamaño por defecto (Mediano)
+  // Al soltar en el área del planeta, se añade el elemento con su posición y tamaño por defecto (Mediano)
   const handleDrop = (e) => {
     e.preventDefault();
-    const element = JSON.parse(e.dataTransfer.getData("element"));
+    const data = e.dataTransfer.getData("text/plain");
+    if (!data) {
+      console.warn("No se encontró dato de 'element' en el dataTransfer.");
+      return;
+    }
+    let element;
+    try {
+      element = JSON.parse(data);
+    } catch (err) {
+      console.error("Error al parsear el JSON:", err);
+      return;
+    }
     const rect = e.currentTarget.getBoundingClientRect();
     const x = (e.clientX - rect.left) / zoom;
     const y = (e.clientY - rect.top) / zoom;
     const newElement = {
-      uid: Date.now(), // ID único
+      uid: Date.now(), // ID único local
       ...element,
       x,
       y,
@@ -52,12 +63,12 @@ function MiPlaneta() {
     e.preventDefault();
   };
 
-  // Actualiza la posición del elemento al finalizar el drag
+  // Actualiza la posición del elemento cuando se termina de arrastrar
   const updatePosition = (uid, x, y) => {
     setPlanetElements(prev => prev.map(el => el.uid === uid ? { ...el, x, y } : el));
   };
 
-  // Modifica el tamaño según la acción: 'up' para aumentar, 'down' para disminuir
+  // Cambia el tamaño del elemento: 'up' para aumentar, 'down' para disminuir
   const changeSize = (uid, action) => {
     setPlanetElements(prev =>
       prev.map(el => {
@@ -72,7 +83,7 @@ function MiPlaneta() {
     );
   };
 
-  // Controles de zoom
+  // Controles de zoom para ver distintas regiones del planeta
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.2, 2));
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.2, 0.5));
 
@@ -115,7 +126,7 @@ function MiPlaneta() {
       </div>
 
       <div className="pm-content">
-        {/* Panel lateral de elementos disponibles */}
+        {/* Panel lateral de elementos */}
         <aside className="pm-sidebar">
           <h2>Elementos Disponibles</h2>
           <div className="pm-sidebar-list">
@@ -133,7 +144,7 @@ function MiPlaneta() {
           </div>
         </aside>
 
-        {/* Área del planeta: ahora usa una imagen (planet.png) */}
+        {/* Área del planeta: utiliza la imagen "planet.png" como fondo */}
         <div 
           className="pm-planet-area" 
           onDrop={handleDrop} 
@@ -155,6 +166,7 @@ function MiPlaneta() {
                   }}
                 >
                   <img src={el.image} alt={el.title} style={{ width: '100%', height: '100%' }} />
+                  {/* Los controles de tamaño aparecen solo al hover */}
                   <div className="pm-size-controls">
                     <button className="size-btn" onClick={() => changeSize(el.uid, 'up')}>
                       <i className="fa fa-arrow-up" aria-hidden="true"></i>
@@ -180,6 +192,7 @@ function MiPlaneta() {
     </div>
   );
 }
+
 
 
 export default MiPlaneta;

@@ -1,5 +1,4 @@
 /* styles/planetMap.css */
-
 .planet-map-container {
   display: flex;
   flex-direction: column;
@@ -55,47 +54,64 @@
   background-color: #6b55d7;
 }
 
+/* Actualización del panel lateral de Elementos Disponibles */
 .pm-content {
   display: flex;
   flex: 1;
-  gap: 20px;
+  gap: 10px; /* Se reduce el espacio entre la sidebar y el área del planeta */
   margin: 20px;
 }
 
-/* Panel lateral de elementos */
 .pm-sidebar {
-  width: 250px;
-  background-color: #fff;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  width: 200px; /* Ancho ligeramente reducido */
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  padding: 20px;
+  border: 2px solid #7c63f6;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: 'Poppins', sans-serif; /* Puedes cambiar a otra fuente sugerente si gustas */
+  text-align: center;
+  margin-right: 10px; /* Menor margen para acercarla al planeta */
 }
 
 .pm-sidebar h2 {
-  text-align: center;
-  margin-bottom: 10px;
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  color: #4a4a4a;
 }
 
 .pm-sidebar-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .pm-sidebar-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: grab;
+  background-color: #fff;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pm-sidebar-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .pm-element-image {
   width: 40px;
   height: 40px;
   object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid #7c63f6;
 }
 
-/* Área del planeta */
+
 .pm-planet-area {
   flex: 1;
   position: relative;
@@ -105,7 +121,6 @@
   align-items: center;
 }
 
-/* El planeta ahora es una imagen de fondo */
 .pm-planet {
   width: 500px;
   height: 500px;
@@ -117,7 +132,6 @@
   box-shadow: inset 0 0 30px rgba(0,0,0,0.3);
 }
 
-/* Elementos en el planeta */
 .pm-planet-element {
   position: absolute;
   cursor: grab;
@@ -126,7 +140,6 @@
   align-items: center;
 }
 
-/* Los controles de tamaño aparecen solo al pasar el mouse */
 .pm-size-controls {
   display: none;
   position: absolute;

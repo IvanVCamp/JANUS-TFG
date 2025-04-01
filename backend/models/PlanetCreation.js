@@ -5,7 +5,7 @@ const PlanetElementSchema = new mongoose.Schema({
   elementId: { type: String, required: true },
   title: { type: String, required: true },
   image: { type: String },
-  size: { type: Number, required: true }, // 1: pequeño, 2: mediano, 3: grande
+  size: { type: Number, required: true }, // 1: Pequeño, 2: Mediano, 3: Grande
   x: { type: Number, required: true },
   y: { type: Number, required: true }
 });
@@ -16,4 +16,4 @@ const PlanetMapSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('PlanetCreation', PlanetMapSchema);
+module.exports = mongoose.model('PlanetMap', PlanetMapSchema);
