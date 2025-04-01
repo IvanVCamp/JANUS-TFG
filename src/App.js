@@ -9,7 +9,7 @@ import Messaging from './components/Messaging';
 import TaskPlanner from './components/TaskPlanner';
 import TimeMachineGame from './components/TimeMachineGame';
 import EmotionsDiary from './components/EmotionsDiary';
-
+import MiPlaneta from './components/MiPlaneta';
 function App() {
   return (
     <Router>
@@ -23,6 +23,7 @@ function App() {
         <Route path="/planner" element={<TaskPlanner />} />
         <Route path="/time-machine-game" element={<TimeMachineGame />} />
         <Route path="/diario-de-emociones" element={<EmotionsDiary />} />
+        <Route path="/mi-planeta" element={<MiPlaneta />} />
         </Routes>
     </Router>
   );
