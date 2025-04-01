@@ -1,22 +1,16 @@
 const mongoose = require('mongoose');
 
-const DiaryEntrySchema = new mongoose.Schema({
+const EmotionEntrySchema = new mongoose.Schema({
   activityId: { type: String, required: true },
   title: { type: String, required: true },
   icon: { type: String },
-  rating: { 
-    type: String, 
-    enum: ['muy feliz', 'feliz', 'neutral', 'poco feliz', 'nada feliz'],
-    required: true 
-  }
+  rating: { type: Number, required: true } // 1 a 5
 });
 
-const EmotionDiarySchema = new mongoose.Schema({
+const DiarioEmocionesSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  // Opcional: referenciar el resultado de Máquina del Tiempo evaluado
-  gameResult: { type: mongoose.Schema.Types.ObjectId, ref: 'TimeMachineResult' },
-  date: { type: Date, default: Date.now },
-  entries: [DiaryEntrySchema]
+  diary: [EmotionEntrySchema],
+  createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('EmotionDiary', EmotionDiarySchema);
+module.exports = mongoose.model('DiarioEmociones', DiarioEmocionesSchema);

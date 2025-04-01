@@ -8,14 +8,11 @@ function Home() {
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // Manejar cambio de fecha en el calendario
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
 
-  // Ejemplo de logout (redirige a la pantalla de login)
   const handleLogout = () => {
-    // Lógica para logout, p.ej. limpiar token, etc.
     navigate('/');
   };
 
@@ -43,7 +40,9 @@ function Home() {
         {/* Sección de bienvenida */}
         <section className="intro-section">
           <h2>¡Bienvenido/a a JANUS!</h2>
-          <p>Explora las distintas opciones que tenemos para ti. Elige una sección o revisa el calendario.</p>
+          <p>
+            Explora las distintas opciones que tenemos para ti. Elige una sección o revisa el calendario.
+          </p>
         </section>
 
         <div className="buttons-and-calendar">
@@ -59,7 +58,6 @@ function Home() {
               Máquina del Tiempo
             </button>
 
-            {/* Tres botones futuros, deshabilitados por ahora */}
             <button className="option-btn disabled-btn">
               <i className="fa fa-globe icon" aria-hidden="true"></i>
               Mi Planeta
@@ -70,7 +68,7 @@ function Home() {
               Misión: Yo puedo
             </button>
 
-            <button className="option-btn disabled-btn">
+            <button className="option-btn" onClick={() => navigate('/diario-de-emociones')}>
               <i className="fa fa-book icon" aria-hidden="true"></i>
               Mi diario de emociones
             </button>
