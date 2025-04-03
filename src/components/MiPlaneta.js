@@ -23,34 +23,35 @@ const sizeScales = {
 
 function MiPlaneta() {
   const [planetElements, setPlanetElements] = useState([]);
-  const [zoom, setZoom] = useState(1);
+  const [planetName, setPlanetName] = useState("Mi Planeta");
+  const [planetSlogan, setPlanetSlogan] = useState("");
   const navigate = useNavigate();
 
-  // Inicia el drag desde el panel lateral, usando "text/plain" para asegurar la transferencia
+  // Inicia el drag desde el panel lateral usando "text/plain"
   const handleDragStart = (e, element) => {
     e.dataTransfer.setData("text/plain", JSON.stringify(element));
   };
 
-  // Al soltar en el área del planeta, se añade el elemento con su posición y tamaño por defecto (Mediano)
+  // Al soltar en el área del planeta, agrega el elemento
   const handleDrop = (e) => {
     e.preventDefault();
     const data = e.dataTransfer.getData("text/plain");
     if (!data) {
-      console.warn("No se encontró dato de 'element' en el dataTransfer.");
+      console.warn("No se encontró dato de 'element' en dataTransfer.");
       return;
     }
     let element;
     try {
       element = JSON.parse(data);
     } catch (err) {
-      console.error("Error al parsear el JSON:", err);
+      console.error("Error al parsear JSON:", err);
       return;
     }
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / zoom;
-    const y = (e.clientY - rect.top) / zoom;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
     const newElement = {
-      uid: Date.now(), // ID único local
+      uid: Date.now(), // ID único
       ...element,
       x,
       y,
@@ -59,13 +60,13 @@ function MiPlaneta() {
     setPlanetElements(prev => [...prev, newElement]);
   };
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-  };
+  const handleDragOver = (e) => e.preventDefault();
 
-  // Actualiza la posición del elemento cuando se termina de arrastrar
+  // Actualiza la posición tras arrastrar
   const updatePosition = (uid, x, y) => {
-    setPlanetElements(prev => prev.map(el => el.uid === uid ? { ...el, x, y } : el));
+    setPlanetElements(prev =>
+      prev.map(el => (el.uid === uid ? { ...el, x, y } : el))
+    );
   };
 
   // Cambia el tamaño del elemento: 'up' para aumentar, 'down' para disminuir
@@ -83,11 +84,30 @@ function MiPlaneta() {
     );
   };
 
-  // Controles de zoom para ver distintas regiones del planeta
-  const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.2, 2));
-  const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.2, 0.5));
+  // Elimina un elemento del planeta
+  const handleDeleteElement = (uid) => {
+    setPlanetElements(prev => prev.filter(el => el.uid !== uid));
+  };
 
-  // Guarda la configuración del planeta en el backend
+  // Deshace la última acción (elimina el último elemento agregado)
+  const handleUndo = () => {
+    setPlanetElements(prev => prev.slice(0, -1));
+  };
+
+  // Duplica el último hábitat agregado
+  const handleDuplicateLast = () => {
+    setPlanetElements(prev => {
+      if (prev.length === 0) return prev;
+      const last = prev[prev.length - 1];
+      const duplicate = { ...last, uid: Date.now(), x: last.x + 10, y: last.y + 10 };
+      return [...prev, duplicate];
+    });
+  };
+
+  // Reinicia el planeta (limpia todos los elementos)
+  const handleReset = () => setPlanetElements([]);
+
+  // Guarda la configuración en el backend
   const handleSavePlanet = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -107,7 +127,7 @@ function MiPlaneta() {
     <div className="planet-map-container">
       <header className="pm-header">
         <button className="back-btn" onClick={() => navigate('/dashboard')}>←</button>
-        <h1>Mi Planeta – Crea tu hábitat</h1>
+        <h1>{planetName} – Crea tu hábitat</h1>
       </header>
 
       <div className="pm-instructions">
@@ -120,70 +140,102 @@ function MiPlaneta() {
         </p>
       </div>
 
-      <div className="pm-controls">
-        <button onClick={handleZoomOut}>− Zoom</button>
-        <button onClick={handleZoomIn}>+ Zoom</button>
-      </div>
-
-      <div className="pm-content">
-        {/* Panel lateral de elementos */}
-        <aside className="pm-sidebar">
-          <h2>Elementos Disponibles</h2>
-          <div className="pm-sidebar-list">
-            {availableElements.map((el) => (
-              <div 
-                key={el.id} 
-                className="pm-sidebar-item" 
-                draggable 
-                onDragStart={(e) => handleDragStart(e, el)}
-              >
-                <img src={el.image} alt={el.title} className="pm-element-image" />
-                <span>{el.title}</span>
-              </div>
-            ))}
-          </div>
-        </aside>
-
-        {/* Área del planeta: utiliza la imagen "planet.png" como fondo */}
-        <div 
-          className="pm-planet-area" 
-          onDrop={handleDrop} 
-          onDragOver={handleDragOver}
-          style={{ transform: `scale(${zoom})` }}
-        >
-          <div className="pm-planet">
-            {planetElements.map((el) => (
-              <Draggable
-                key={el.uid}
-                defaultPosition={{ x: el.x, y: el.y }}
-                onStop={(e, data) => updatePosition(el.uid, data.x, data.y)}
-              >
-                <div 
-                  className="pm-planet-element" 
-                  style={{ 
-                    width: `${sizeScales[el.size] * 80}px`, 
-                    height: `${sizeScales[el.size] * 80}px`
-                  }}
+      <div className="pm-main-content">
+        <div className="pm-left-section">
+          {/* Panel lateral de Elementos Disponibles */}
+          <aside className="pm-sidebar">
+            <h2>Elementos Disponibles</h2>
+            <div className="pm-sidebar-list">
+              {availableElements.map((el) => (
+                <div
+                  key={el.id}
+                  className="pm-sidebar-item"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, el)}
                 >
-                  <img src={el.image} alt={el.title} style={{ width: '100%', height: '100%' }} />
-                  {/* Los controles de tamaño aparecen solo al hover */}
-                  <div className="pm-size-controls">
-                    <button className="size-btn" onClick={() => changeSize(el.uid, 'up')}>
-                      <i className="fa fa-arrow-up" aria-hidden="true"></i>
-                    </button>
-                    <button className="size-btn" onClick={() => changeSize(el.uid, 'down')}>
-                      <i className="fa fa-arrow-down" aria-hidden="true"></i>
-                    </button>
-                  </div>
+                  <img src={el.image} alt={el.title} className="pm-element-image" />
+                  <span>{el.title}</span>
                 </div>
-              </Draggable>
-            ))}
+              ))}
+            </div>
+          </aside>
+
+          {/* Área del planeta */}
+          <div
+            className="pm-planet-area"
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+          >
+            <div className="pm-planet">
+              {planetElements.map((el) => (
+                <Draggable
+                  key={el.uid}
+                  defaultPosition={{ x: el.x, y: el.y }}
+                  onStop={(e, data) => updatePosition(el.uid, data.x, data.y)}
+                >
+                  <div
+                    className="pm-planet-element"
+                    style={{
+                      width: `${sizeScales[el.size] * 80}px`,
+                      height: `${sizeScales[el.size] * 80}px`
+                    }}
+                  >
+                    <img src={el.image} alt={el.title} style={{ width: '100%', height: '100%' }} />
+                    <div className="pm-size-controls">
+                      <button className="size-btn" onClick={() => changeSize(el.uid, 'up')}>
+                        <i className="fa fa-arrow-up" aria-hidden="true"></i>
+                      </button>
+                      <button className="size-btn" onClick={() => changeSize(el.uid, 'down')}>
+                        <i className="fa fa-arrow-down" aria-hidden="true"></i>
+                      </button>
+                      <button className="delete-btn" onClick={() => handleDeleteElement(el.uid)}>
+                        <i className="fa fa-trash" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                  </div>
+                </Draggable>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="pm-actions">
-        <button className="save-btn" onClick={handleSavePlanet}>Guardar Mi Planeta</button>
+        {/* Panel de Configuración Ampliado */}
+        <div className="pm-config-panel">
+          <h2>Configuración</h2>
+          <div className="pm-config-item">
+            <label>Nombre del Planeta:</label>
+            <input
+              type="text"
+              value={planetName}
+              onChange={(e) => setPlanetName(e.target.value)}
+            />
+          </div>
+          <div className="pm-config-item">
+            <label>Eslogan del Planeta:</label>
+            <input
+              type="text"
+              placeholder="Tu eslogan aquí..."
+              value={planetSlogan}
+              onChange={(e) => setPlanetSlogan(e.target.value)}
+            />
+          </div>
+          <div className="pm-config-item">
+            <p>Total de Hábitats: {planetElements.length}</p>
+          </div>
+          <div className="pm-config-buttons">
+            <button onClick={handleReset}>Limpiar Planeta</button>
+            <button onClick={handleUndo}>Deshacer Última Acción</button>
+            <button onClick={handleDuplicateLast}>Duplicar Último Hábitat</button>
+          </div>
+          <div className="pm-config-buttons">
+            <button onClick={handleSavePlanet}>Guardar Planeta</button>
+          </div>
+          {planetSlogan && (
+            <div className="pm-slogan-preview">
+              <p><em>{planetSlogan}</em></p>
+            </div>
+          )}
+        </div>
       </div>
 
       <footer className="pm-footer">
@@ -192,7 +244,5 @@ function MiPlaneta() {
     </div>
   );
 }
-
-
 
 export default MiPlaneta;

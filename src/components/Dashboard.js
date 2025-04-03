@@ -58,7 +58,7 @@ function Home() {
               Máquina del Tiempo
             </button>
 
-            <button className="option-btn disabled-btn">
+            <button className="option-btn" onClick={() => navigate('/mi-planeta')}>
               <i className="fa fa-globe icon" aria-hidden="true"></i>
               Mi Planeta
             </button>
