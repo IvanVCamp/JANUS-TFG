@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+// src/components/Register.js
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import authService from '../services/authService';
+import axios from 'axios';
 import '../styles/register.css';
 
 function Register() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+  const invitationId = query.get('invitationId'); // Extraemos invitationId de la URL
 
   const [formData, setFormData] = useState({
     nombre: '',
@@ -15,7 +20,6 @@ function Register() {
     confirmPassword: '',
     role: ''
   });
-
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -23,8 +27,9 @@ function Register() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Convertir el valor seleccionado a minúsculas
   const handleSelectChange = (e) => {
-    setFormData({ ...formData, role: e.target.value });
+    setFormData({ ...formData, role: e.target.value.toLowerCase() });
   };
 
   const handleSubmit = async (e) => {
@@ -35,6 +40,38 @@ function Register() {
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden');
       return;
+    }
+
+    // Si se registra como paciente, comprobar que exista una invitación válida
+    if (formData.role.toLowerCase() === "paciente") {
+      try {
+        let response;
+        // Si existe invitationId en la URL, se utiliza para validar la invitación
+        if (invitationId) {
+          response = await axios.get(
+            `http://localhost:5000/api/invitations?invitationId=${invitationId}`,
+            { headers: { 'Content-Type': 'application/json' } }
+          );
+        } else {
+          // Caso alternativo: se puede validar usando el correo
+          const token = localStorage.getItem('token');
+          const normalizedEmail = formData.email.trim().toLowerCase();
+          response = await axios.get(
+            `http://localhost:5000/api/invitations?email=${normalizedEmail}`,
+            { headers: { 'x-auth-token': token, 'Content-Type': 'application/json' } }
+          );
+        }
+        if (!response.data.valid) {
+          setError('No tienes una invitación válida para registrarte como paciente');
+          return;
+        }
+        // Asigna el id del terapeuta que invitó para vincular al paciente
+        formData.invitedBy = response.data.therapist;
+      } catch (error) {
+        console.error("Error en la validación de la invitación:", error);
+        setError('Error al validar la invitación');
+        return;
+      }
     }
 
     try {
@@ -52,12 +89,9 @@ function Register() {
     <div className="register-container">
       <form onSubmit={handleSubmit} className="register-form">
         <h2 className="form-title">Crear Cuenta</h2>
-
-        {/* Mensajes de error/éxito (ocupan 2 columnas) */}
         {error && <p className="error">{error}</p>}
         {success && <p className="success">{success}</p>}
 
-        {/* Campo: Nombre */}
         <div className="input-wrapper">
           <label htmlFor="nombre">Nombre:</label>
           <input
@@ -71,21 +105,6 @@ function Register() {
           />
         </div>
 
-        {/* Campo: Contraseña */}
-        <div className="input-wrapper">
-          <label htmlFor="password">Contraseña:</label>
-          <input
-            type="password"
-            name="password"
-            id="password"
-            placeholder="********"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        {/* Campo: Apellidos */}
         <div className="input-wrapper">
           <label htmlFor="apellidos">Apellidos:</label>
           <input
@@ -99,7 +118,44 @@ function Register() {
           />
         </div>
 
-        {/* Campo: Confirmar Contraseña */}
+        <div className="input-wrapper">
+          <label htmlFor="fechaNacimiento">Fecha de Nacimiento:</label>
+          <input
+            type="date"
+            name="fechaNacimiento"
+            id="fechaNacimiento"
+            value={formData.fechaNacimiento}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="input-wrapper">
+          <label htmlFor="email">Email:</label>
+          <input
+            type="email"
+            name="email"
+            id="email"
+            placeholder="example@gmail.com"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="input-wrapper">
+          <label htmlFor="password">Contraseña:</label>
+          <input
+            type="password"
+            name="password"
+            id="password"
+            placeholder="********"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
         <div className="input-wrapper">
           <label htmlFor="confirmPassword">Confirmar Contraseña:</label>
           <input
@@ -113,20 +169,6 @@ function Register() {
           />
         </div>
 
-        {/* Campo: Fecha de Nacimiento */}
-        <div className="input-wrapper">
-          <label htmlFor="fechaNacimiento">Fecha de Nacimiento:</label>
-          <input
-            type="date"
-            name="fechaNacimiento"
-            id="fechaNacimiento"
-            value={formData.fechaNacimiento}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        {/* Campo: Rol */}
         <div className="input-wrapper roles-wrapper">
           <label htmlFor="role">Rol:</label>
           <select
@@ -138,33 +180,17 @@ function Register() {
             required
           >
             <option value="">Selecciona un rol</option>
-            <option value="Padre">Padre</option>
+            <option value="padre">Padre</option>
             <option value="paciente">Paciente</option>
             <option value="terapeuta">Terapeuta</option>
             <option value="tutor">Tutor</option>
           </select>
         </div>
 
-        {/* Campo: Email */}
-        <div className="input-wrapper">
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            name="email"
-            id="email"
-            placeholder="example@gmail.cc"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        {/* Botón de Registrar */}
         <div className="button-wrapper">
           <button type="submit" className="register-btn">Registrar</button>
         </div>
 
-        {/* Enlace para iniciar sesión */}
         <div className="login-link-wrapper">
           <p>
             ¿Ya tienes cuenta? <a href="/">Inicia sesión</a>

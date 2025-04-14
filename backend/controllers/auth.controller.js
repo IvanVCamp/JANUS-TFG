@@ -1,22 +1,33 @@
+// auth.controller.js
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { generateToken, generateResetToken } = require('../utils/token');
 const sendEmail = require('../utils/mailer');
+const Invitation = require('../models/Invitation'); // Para modificar registro de pacientes
 
 exports.register = async (req, res) => {
-  // Agregamos role en la desestructuración
+  // Se extrae también el campo "role"
   const { nombre, apellidos, fechaNacimiento, email, password, role } = req.body;
 
   try {
-    // Verificar si el usuario ya existe
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ msg: 'El usuario ya existe' });
     }
 
+    // Si el rol es de paciente, verificar que exista una invitación no aceptada
+    if (role === 'paciente') {
+      const invitation = await Invitation.findOne({ invitedEmail: email, accepted: false });
+      if (!invitation) {
+        return res.status(400).json({ msg: 'No se encontró una invitación para este correo; no puedes registrarte como paciente' });
+      }
+      // Marcar la invitación como aceptada para que no se pueda reutilizar
+      invitation.accepted = true;
+      await invitation.save();
+    }
+
     let fechaNacimientoDate;
-    // Convertir fecha según formato recibido
     if (fechaNacimiento.includes('/')) {
       const parts = fechaNacimiento.split('/');
       if (parts.length !== 3) {
@@ -29,20 +40,19 @@ exports.register = async (req, res) => {
       return res.status(400).json({ msg: 'Formato de fecha inválido' });
     }
 
-    // Crear y guardar usuario, incluyendo el rol
     user = new User({
       nombre,
       apellidos,
       fechaNacimiento: fechaNacimientoDate,
       email,
       password,
-      role  // Se añade el rol recibido en req.body
+      role
     });
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
     await user.save();
 
-    // Enviar correo de bienvenida
+    // Enviar correo de bienvenida (opcional)
     await sendEmail({
       to: user.email,
       subject: 'Bienvenido a la aplicación',
@@ -50,9 +60,10 @@ exports.register = async (req, res) => {
       html: '<p>Gracias por registrarte. ¡Bienvenido!</p>'
     });
 
-    // Generar token de sesión y redirigir al dashboard
-    const token = generateToken(user.id);
-    res.status(201).json({ token });
+    // Generamos el token incluyendo el rol
+    const token = generateToken(user.id, user.role.toLowerCase());
+    // Devolvemos tanto el token como el rol para que el frontend redirija adecuadamente
+    res.status(201).json({ token, role: user.role });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Error en el servidor');
@@ -63,7 +74,6 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Buscar y validar usuario
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ msg: 'Credenciales inválidas' });
@@ -72,8 +82,9 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ msg: 'Credenciales inválidas' });
     }
-    const token = generateToken(user.id);
-    res.json({ token });
+    // Convertir el rol a minúsculas antes de generar el token
+    const token = generateToken(user.id, user.role.toLowerCase());
+    res.json({ token, role: user.role.toLowerCase() });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Error en el servidor');
@@ -88,11 +99,9 @@ exports.forgotPassword = async (req, res) => {
       return res.status(400).json({ msg: 'No existe usuario con ese email' });
     }
 
-    // Generar token de reseteo usando generateResetToken
     const resetToken = generateResetToken(user._id);
     const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
 
-    // Enviar correo de recuperación
     await sendEmail({
       to: user.email,
       subject: 'Recuperación de contraseña',
@@ -115,23 +124,15 @@ exports.resetPassword = async (req, res) => {
   }
 
   try {
-    // Verificar el token usando el secreto para reset
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'resetsecret');
     const userId = decoded.user.id;
-
-    // Buscar el usuario por su id
     const user = await User.findById(userId);
     if (!user) {
       return res.status(400).json({ msg: 'Usuario no encontrado' });
     }
-
-    // Hashear la nueva contraseña
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
-
-    // Guardar los cambios en la base de datos
     await user.save();
-
     res.json({ msg: 'Contraseña actualizada correctamente' });
   } catch (err) {
     console.error(err.message);

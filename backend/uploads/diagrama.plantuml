@@ -1,0 +1,51 @@
+@startuml
+left to right direction
+
+actor "Usuario" as User
+
+package "Sistema de Registro" {
+  usecase "Registrarse" as UC_Register
+  usecase "Iniciar Sesión" as UC_Login
+}
+
+package "Máquina del Tiempo" {
+  usecase "Organizar Actividades" as UC_TimeMachineOrganize
+  usecase "Guardar Resultado de Juego" as UC_TimeMachineSave
+}
+
+package "Diario de Emociones" {
+  usecase "Calificar Actividades" as UC_RateActivities
+  usecase "Guardar Diario" as UC_SaveDiary
+}
+
+package "Mi Planeta" {
+  usecase "Crear/Personalizar Planeta" as UC_CustomizePlanet
+  usecase "Guardar Planeta" as UC_SavePlanet
+}
+
+package "Mensajería" {
+  usecase "Iniciar Chat" as UC_StartChat
+  usecase "Enviar Mensaje" as UC_SendMessage
+  usecase "Adjuntar Archivo" as UC_AttachFile
+  usecase "Recibir Mensaje" as UC_ReceiveMessage
+}
+
+' Relaciones de interacción del Usuario
+User --> UC_Register
+User --> UC_Login
+
+User --> UC_TimeMachineOrganize
+User --> UC_TimeMachineSave
+
+User --> UC_RateActivities
+User --> UC_SaveDiary
+
+User --> UC_CustomizePlanet
+User --> UC_SavePlanet
+
+User --> UC_StartChat
+User --> UC_SendMessage
+User --> UC_AttachFile
+User --> UC_ReceiveMessage
+
+@enduml

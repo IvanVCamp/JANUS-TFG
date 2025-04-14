@@ -6,7 +6,8 @@ const UserSchema = new mongoose.Schema({
   fechaNacimiento: { type: Date, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, required: true }, // Se almacena un único rol
+  role: { type: String, required: true },
+  invitedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Nuevo campo para pacientes
   date: { type: Date, default: Date.now }
 });
 

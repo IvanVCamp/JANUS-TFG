@@ -1,8 +1,8 @@
+// Login.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
 import '../styles/login.css';
-
 import janusLogo from '../assets/janus-logo.png';
 
 function Login() {
@@ -19,7 +19,12 @@ function Login() {
     try {
       const response = await authService.login(formData);
       localStorage.setItem('token', response.data.token);
-      navigate('/dashboard');
+      // Redireccionar según el rol devuelto:
+      if(response.data.role === 'terapeuta') {
+        navigate('/therapist');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setError('Credenciales inválidas');
     }
@@ -33,7 +38,6 @@ function Login() {
 
       <form onSubmit={handleSubmit} className="login-form">
         {error && <p className="error">{error}</p>}
-
         <div className="input-wrapper">
           <label htmlFor="email" className="sr-only">Correo electrónico</label>
           <div className="input-icon-container">
@@ -49,7 +53,6 @@ function Login() {
             />
           </div>
         </div>
-
         <div className="input-wrapper">
           <label htmlFor="password" className="sr-only">Contraseña</label>
           <div className="input-icon-container">
@@ -65,7 +68,6 @@ function Login() {
             />
           </div>
         </div>
-
         <div className="options-container">
           <label className="remember-me">
             <input type="checkbox" name="remember" />
@@ -75,10 +77,8 @@ function Login() {
             ¿Olvidaste tu contraseña?
           </a>
         </div>
-
         <button type="submit" className="login-btn">Iniciar sesión</button>
       </form>
-
       <p className="register-link">
         ¿No tienes una cuenta? <a href="/register">Regístrate</a>
       </p>

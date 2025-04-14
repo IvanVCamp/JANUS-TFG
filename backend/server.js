@@ -32,6 +32,7 @@ app.use('/api/tasks', require('./routes/task.routes'));
 app.use('/api/game', require('./routes/timeMachine.routes'));
 app.use('/api/emotions', require('./routes/emotions.routes'));
 app.use('/api/planet-map', require('./routes/planetMap.routes'));
+app.use('/api/invitations', require('./routes/invitations.routes'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));

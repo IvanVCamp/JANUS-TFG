@@ -10,6 +10,8 @@ import TaskPlanner from './components/TaskPlanner';
 import TimeMachineGame from './components/TimeMachineGame';
 import EmotionsDiary from './components/EmotionsDiary';
 import MiPlaneta from './components/MiPlaneta';
+import TherapistDashboard from './components/TherapistDashboard';
+
 function App() {
   return (
     <Router>
@@ -24,6 +26,7 @@ function App() {
         <Route path="/time-machine-game" element={<TimeMachineGame />} />
         <Route path="/diario-de-emociones" element={<EmotionsDiary />} />
         <Route path="/mi-planeta" element={<MiPlaneta />} />
+        <Route path="/therapist" element={<TherapistDashboard />} />
         </Routes>
     </Router>
   );
