@@ -20,7 +20,8 @@ exports.createDiarioEmociones = async (req, res) => {
 
 exports.getDiarioEmociones = async (req, res) => {
   try {
-    const diary = await DiarioEmociones.find({ user: req.user.id }).sort({ createdAt: -1 });
+    const userId = req.query.patientId || req.user.id;
+    const diary = await DiarioEmociones.find({ user: userId }).sort({ createdAt: -1 });
     res.json(diary);
   } catch (err) {
     console.error(err.message);

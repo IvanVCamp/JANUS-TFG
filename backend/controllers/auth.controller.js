@@ -1,4 +1,3 @@
-// auth.controller.js
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -16,17 +15,21 @@ exports.register = async (req, res) => {
       return res.status(400).json({ msg: 'El usuario ya existe' });
     }
 
+    let assignedTherapist = null;
     // Si el rol es de paciente, verificar que exista una invitación no aceptada
     if (role === 'paciente') {
-      const invitation = await Invitation.findOne({ email: email.trim().toLowerCase(), accepted: false });
+      const invitation = await Invitation.findOne({ invitedEmail: email, accepted: false });
       if (!invitation) {
         console.log("No se encontró una invitación para este correo.");
         return res.status(400).json({ msg: 'No se encontró una invitación para este correo; no puedes registrarte como paciente' });
       }
+      // Marcar la invitación como aceptada para que no se pueda reutilizar
       invitation.accepted = true;
       await invitation.save();
+      assignedTherapist = invitation.therapist;
     }
 
+    // Procesar la fecha de nacimiento
     let fechaNacimientoDate;
     if (fechaNacimiento.includes('/')) {
       const parts = fechaNacimiento.split('/');
@@ -40,13 +43,15 @@ exports.register = async (req, res) => {
       return res.status(400).json({ msg: 'Formato de fecha inválido' });
     }
 
+    // Crear el nuevo usuario y, si es paciente, asignar el terapeuta
     user = new User({
       nombre,
       apellidos,
       fechaNacimiento: fechaNacimientoDate,
       email,
       password,
-      role
+      role,
+      assignedTherapist: assignedTherapist  // Esto será null si no es paciente
     });
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
@@ -69,6 +74,7 @@ exports.register = async (req, res) => {
     res.status(500).send('Error en el servidor');
   }
 };
+
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;

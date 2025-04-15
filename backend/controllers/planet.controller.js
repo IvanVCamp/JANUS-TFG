@@ -1,5 +1,5 @@
 // controllers/planetMap.controller.js
-const PlanetMap = require('../models/PlanetCreation');
+const PlanetMap = require('../models/PlanetMap');
 
 exports.createPlanetMap = async (req, res) => {
   const { elements } = req.body;
@@ -30,7 +30,8 @@ exports.createPlanetMap = async (req, res) => {
 
 exports.getPlanetMap = async (req, res) => {
   try {
-    const planetMap = await PlanetMap.findOne({ user: req.user.id }).sort({ createdAt: -1 });
+    const userId = req.query.patientId || req.user.id;
+    const planetMap = await PlanetMap.findOne({ user: userId }).sort({ createdAt: -1 });
     res.json(planetMap);
   } catch (err) {
     console.error(err.message);

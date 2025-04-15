@@ -21,7 +21,8 @@ exports.createGameResult = async (req, res) => {
 
 exports.getGameResults = async (req, res) => {
   try {
-    const results = await GameResult.find({ user: req.user.id }).sort({ createdAt: -1 });
+    const userId = req.query.patientId || req.user.id;
+    const results = await GameResult.find({ user: userId }).sort({ createdAt: -1 });
     res.json(results);
   } catch (err) {
     console.error(err.message);

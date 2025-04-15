@@ -11,6 +11,7 @@ import TimeMachineGame from './components/TimeMachineGame';
 import EmotionsDiary from './components/EmotionsDiary';
 import MiPlaneta from './components/MiPlaneta';
 import TherapistDashboard from './components/TherapistDashboard';
+import PatientsList from './components/PatientsList';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route path="/diario-de-emociones" element={<EmotionsDiary />} />
         <Route path="/mi-planeta" element={<MiPlaneta />} />
         <Route path="/therapist" element={<TherapistDashboard />} />
+        <Route path="/therapist/patients" element={<PatientsList />} />
         </Routes>
     </Router>
   );
