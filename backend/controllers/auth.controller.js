@@ -18,11 +18,11 @@ exports.register = async (req, res) => {
 
     // Si el rol es de paciente, verificar que exista una invitación no aceptada
     if (role === 'paciente') {
-      const invitation = await Invitation.findOne({ invitedEmail: email, accepted: false });
+      const invitation = await Invitation.findOne({ email: email.trim().toLowerCase(), accepted: false });
       if (!invitation) {
+        console.log("No se encontró una invitación para este correo.");
         return res.status(400).json({ msg: 'No se encontró una invitación para este correo; no puedes registrarte como paciente' });
       }
-      // Marcar la invitación como aceptada para que no se pueda reutilizar
       invitation.accepted = true;
       await invitation.save();
     }

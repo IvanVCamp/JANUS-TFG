@@ -48,29 +48,26 @@ Por favor, haz clic en el siguiente enlace para completar tu registro:\n\n${regi
   }
 };
 
-exports.getInvitation = async (req, res) => {
-  const { email, invitationId } = req.query;
-  console.log("Parámetros recibidos:", req.query);
-  if (!email && !invitationId) {
-    return res.status(400).json({ msg: 'Es obligatorio proporcionar el correo o el ID de la invitación' });
-  }
-  try {
-    let invitation;
-    if (invitationId) {
-      console.log("Buscando invitación por ID:", invitationId);
-      invitation = await Invitation.findOne({ _id: invitationId, accepted: false });
-    } else {
-      const normalizedEmail = email.trim().toLowerCase();
-      console.log("Buscando invitación por email:", normalizedEmail);
-      invitation = await Invitation.findOne({ email: normalizedEmail, accepted: false });
+  exports.getInvitation = async (req, res) => {
+    const { email, invitationId } = req.query;
+    if (!email && !invitationId) {
+      return res.status(400).json({ msg: 'Es obligatorio proporcionar el correo o el ID de la invitación' });
     }
-    console.log("Resultado de la búsqueda:", invitation);
-    if (!invitation) {
-      return res.json({ valid: false });
+    try {
+      let invitation;
+      if (invitationId) {
+        invitation = await Invitation.findOne({ _id: invitationId, accepted: false });
+      } else {
+        const normalizedEmail = email.trim().toLowerCase();
+        invitation = await Invitation.findOne({ email: normalizedEmail, accepted: false });
+      }
+      if (!invitation) {
+        return res.json({ valid: false });
+      }
+      return res.json({ valid: true, therapist: invitation.therapist });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ msg: 'Error en el servidor' });
     }
-    return res.json({ valid: true, therapist: invitation.therapist });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: 'Error en el servidor' });
-  }
-};
+  };
+  
