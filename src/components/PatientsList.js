@@ -52,7 +52,7 @@ function PatientsList() {
     }
   };
 
-  // Consulta el registro de Mi Planeta para el paciente (se usa la URL con guion medio)
+  // Consulta el registro de Mi Planeta para el paciente
   const fetchPlanetMapResult = async (patientId) => {
     try {
       const token = localStorage.getItem('token');
@@ -77,6 +77,7 @@ function PatientsList() {
         headers: { 'x-auth-token': token }
       });
       if (response.data && response.data.length > 0) {
+        // Se toma el primer resultado (o el más reciente)
         setEmotionsDiaryResult(response.data[0]);
       } else {
         setEmotionsDiaryResult(null);

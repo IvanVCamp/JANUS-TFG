@@ -1,54 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/emotionsDiary.css';
 
 function EmotionsDiary() {
   const navigate = useNavigate();
+  const location = useLocation();
+  // Determinamos el modo (snapshot vs interactivo) leyendo la query "patientId"
+  const searchParams = new URLSearchParams(location.search);
+  const queryPatientId = searchParams.get('patientId');
+  const isViewMode = Boolean(queryPatientId);
+
+  // Estados para el modo interactivo
   const [activities, setActivities] = useState([]);
-  const [ratings, setRatings] = useState({}); // { activityId: rating }
-  
-  // Verifica que el token exista; si no, redirige al login
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) navigate('/');
-  }, [navigate]);
+  const [ratings, setRatings] = useState({});
 
-  // Cargar actividades desde los resultados de la Máquina del Tiempo
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    axios
-      .get('http://localhost:5000/api/game', { headers: { 'x-auth-token': token } })
-      .then(response => {
-        // Suponemos que response.data es un array de resultados, cada uno con timeSlots
-        const gameResults = response.data;
-        const activityMap = {};
-        gameResults.forEach(result => {
-          if (result.timeSlots) {
-            result.timeSlots.forEach(slot => {
-              if (slot.activities) {
-                slot.activities.forEach(act => {
-                  // Agrupar por activityId para obtener actividades únicas
-                  if (!activityMap[act.activityId]) {
-                    activityMap[act.activityId] = {
-                      activityId: act.activityId,
-                      title: act.title,
-                      icon: act.icon
-                    };
-                  }
-                });
-              }
-            });
-          }
-        });
-        setActivities(Object.values(activityMap));
-      })
-      .catch(error => {
-        console.error("Error al cargar actividades:", error);
-      });
-  }, []);
+  // Estado para el modo snapshot (diario guardado)
+  const [snapshotDiary, setSnapshotDiary] = useState(null);
 
-  // Niveles del termómetro: valores del 1 al 5.
+  // Niveles de felicidad para el termómetro
   const levels = [
     { value: 1, label: 'Nada feliz', emoji: '😞' },
     { value: 2, label: 'Poco feliz', emoji: '🙁' },
@@ -57,10 +27,69 @@ function EmotionsDiary() {
     { value: 5, label: 'Muy feliz', emoji: '😄' }
   ];
 
+  // Verificar que exista token; sino, redirige al login
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) navigate('/');
+  }, [navigate]);
+
+  // Si estamos en modo snapshot, obtenemos el último diario guardado
+  useEffect(() => {
+    if (isViewMode) {
+      const fetchSnapshotDiary = async () => {
+        try {
+          const token = localStorage.getItem('token');
+          const response = await axios.get(`http://localhost:5000/api/emotions?patientId=${queryPatientId}`, {
+            headers: { 'x-auth-token': token }
+          });
+          if (response.data && response.data.length > 0) {
+            // Tomamos el diario más reciente (el primero)
+            setSnapshotDiary(response.data[0]);
+          }
+        } catch (error) {
+          console.error("Error al obtener el diario de emociones guardado:", error);
+        }
+      };
+      fetchSnapshotDiary();
+    } else {
+      // En modo interactivo, cargamos las actividades a partir de los resultados de la Máquina del Tiempo
+      const token = localStorage.getItem('token');
+      axios
+        .get('http://localhost:5000/api/game', { headers: { 'x-auth-token': token } })
+        .then(response => {
+          const gameResults = response.data;
+          const activityMap = {};
+          gameResults.forEach(result => {
+            if (result.timeSlots) {
+              result.timeSlots.forEach(slot => {
+                if (slot.activities) {
+                  slot.activities.forEach(act => {
+                    if (!activityMap[act.activityId]) {
+                      activityMap[act.activityId] = {
+                        activityId: act.activityId,
+                        title: act.title,
+                        icon: act.icon
+                      };
+                    }
+                  });
+                }
+              });
+            }
+          });
+          setActivities(Object.values(activityMap));
+        })
+        .catch(error => {
+          console.error("Error al cargar actividades:", error);
+        });
+    }
+  }, [isViewMode, queryPatientId]);
+
+  // Función para cambiar el rating en modo interactivo
   const handleRatingChange = (activityId, rating) => {
     setRatings(prev => ({ ...prev, [activityId]: rating }));
   };
 
+  // Función para enviar el diario (guardar) en modo interactivo
   const handleSubmitDiary = async () => {
     const token = localStorage.getItem('token');
     const payload = {
@@ -83,6 +112,53 @@ function EmotionsDiary() {
     }
   };
 
+  // Renderizado condicional según el modo: Snapshot (Vista) o Interactivo (Paciente)
+  if (isViewMode) {
+    // Modo Snapshot: Se muestra el diario de emociones guardado de forma estática
+    return (
+      <div className="diario-emociones-container">
+        <header className="de-header">
+          <div className="de-header-left">
+            <button className="back-dashboard-btn" onClick={() => navigate('/dashboard')}>←</button>
+            <h1>Diario de Emociones - Último Guardado</h1>
+          </div>
+        </header>
+        <main className="de-main">
+          <section className="de-intro">
+            <p>A continuación se muestra el estado de tu diario de emociones guardado.</p>
+          </section>
+          <section className="de-activities">
+            {snapshotDiary && snapshotDiary.diary && snapshotDiary.diary.length > 0 ? (
+              <div className="activities-grid">
+                {snapshotDiary.diary.map((entry, index) => {
+                  const level = levels.find(l => l.value === entry.rating);
+                  return (
+                    <div key={index} className="activity-card">
+                      <div className="activity-icon">{entry.icon}</div>
+                      <div className="activity-title">{entry.title}</div>
+                      <div className="activity-thermometer">
+                        <div className="thermo-display">
+                          <span className="thermo-emoji">{level ? level.emoji : ''}</span>
+                          <span className="thermo-label">{level ? level.label : ''}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p>No se encontró un diario guardado.</p>
+            )}
+          </section>
+        </main>
+        <footer className="de-footer">
+          <p>2025 © Iván Vela Campos</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // Modo interactivo: El paciente puede seleccionar los ratings y guardar el diario
   return (
     <div className="diario-emociones-container">
       <header className="de-header">
@@ -91,7 +167,6 @@ function EmotionsDiary() {
           <h1>Diario de Emociones</h1>
         </div>
       </header>
-
       <main className="de-main">
         <section className="de-intro">
           <p>¿Cómo te sientes con lo bien que haces estas actividades?</p>
@@ -126,7 +201,6 @@ function EmotionsDiary() {
           <button className="de-submit-btn" onClick={handleSubmitDiary}>Guardar Diario</button>
         </section>
       </main>
-
       <footer className="de-footer">
         <p>2025 © Iván Vela Campos</p>
       </footer>
