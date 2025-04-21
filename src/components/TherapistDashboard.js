@@ -26,7 +26,7 @@ function TherapistDashboard() {
   try {
     const token = localStorage.getItem('token');
     await axios.post(
-      'http://localhost:5000/api/invitations',
+      'https://localhost:8080/api/invitations',
       { invitedEmail: emailTrimmed },
       { headers: { 'Content-Type': 'application/json', 'x-auth-token': token } }
     );

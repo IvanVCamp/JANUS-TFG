@@ -1,5 +1,4 @@
-// src/components/Register.js
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import authService from '../services/authService';
 import axios from 'axios';
@@ -9,7 +8,7 @@ function Register() {
   const navigate = useNavigate();
   const location = useLocation();
   const query = new URLSearchParams(location.search);
-  const invitationId = query.get('invitationId'); // Extraemos invitationId de la URL
+  const invitationId = query.get('invitationId');
 
   const [formData, setFormData] = useState({
     nombre: '',
@@ -24,12 +23,11 @@ function Register() {
   const [success, setSuccess] = useState('');
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  // Convertir el valor seleccionado a minúsculas
   const handleSelectChange = (e) => {
-    setFormData({ ...formData, role: e.target.value.toLowerCase() });
+    setFormData(prev => ({ ...prev, role: e.target.value.toLowerCase() }));
   };
 
   const handleSubmit = async (e) => {
@@ -42,45 +40,46 @@ function Register() {
       return;
     }
 
-    // Si se registra como paciente, comprobar que exista una invitación válida
-    if (formData.role.toLowerCase() === "paciente") {
+    let body = { ...formData };
+
+    if (formData.role === 'paciente') {
       try {
-        let response;
-        // Si existe invitationId en la URL, se utiliza para validar la invitación
-        if (invitationId) {
-          response = await axios.get(
-            `http://localhost:5000/api/invitations?invitationId=${invitationId}`,
-            { headers: { 'Content-Type': 'application/json' } }
-          );
-        } else {
-          // Caso alternativo: se puede validar usando el correo
-          const token = localStorage.getItem('token');
-          const normalizedEmail = formData.email.trim().toLowerCase();
-          response = await axios.get(
-            `http://localhost:5000/api/invitations?email=${normalizedEmail}`,
-            { headers: { 'x-auth-token': token, 'Content-Type': 'application/json' } }
-          );
-        }
+        const params = invitationId
+          ? `invitationId=${invitationId}`
+          : `email=${formData.email.trim().toLowerCase()}`;
+
+        const headers = invitationId
+          ? { 'Content-Type': 'application/json' }
+          : {
+              'Content-Type': 'application/json',
+              'x-auth-token': localStorage.getItem('token')
+            };
+
+        const response = await axios.get(
+          `https://localhost:8080/api/invitations?${params}`,
+          { headers }
+        );
+
         if (!response.data.valid) {
           setError('No tienes una invitación válida para registrarte como paciente');
           return;
         }
-        // Asigna el id del terapeuta que invitó para vincular al paciente
-        formData.invitedBy = response.data.therapist;
-      } catch (error) {
-        console.error("Error en la validación de la invitación:", error);
+
+        // Ahora incluimos invitationId en lugar de invitedBy
+        body = { ...body, invitationId };
+      } catch (err) {
+        console.error('Error validando invitación:', err.response?.data || err);
         setError('Error al validar la invitación');
         return;
       }
     }
 
     try {
-      await authService.register(formData);
+      await authService.register(body);
       setSuccess('Registro exitoso, ya puedes iniciar sesión.');
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
+      setTimeout(() => navigate('/'), 2000);
     } catch (err) {
+      console.error('Registro fallido:', err.response?.data || err);
       setError('Error en el registro. Inténtalo de nuevo.');
     }
   };

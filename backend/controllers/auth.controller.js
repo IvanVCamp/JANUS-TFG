@@ -1,29 +1,38 @@
 const User = require('../models/User');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { generateToken, generateResetToken } = require('../utils/token');
 const sendEmail = require('../utils/mailer');
-const Invitation = require('../models/Invitation'); // Para modificar registro de pacientes
+const Invitation = require('../models/Invitation'); // Para manejar registro de pacientes
 
 exports.register = async (req, res) => {
-  // Se extrae también el campo "role"
-  const { nombre, apellidos, fechaNacimiento, email, password, role } = req.body;
+  // Se extrae también el campo "invitationId"
+  const { nombre, apellidos, fechaNacimiento, email, password, role, invitationId } = req.body;
 
   try {
+    // Verificar si ya existe usuario
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ msg: 'El usuario ya existe' });
     }
 
     let assignedTherapist = null;
-    // Si el rol es de paciente, verificar que exista una invitación no aceptada
+    // Si el rol es de paciente, verificar invitación válida
     if (role === 'paciente') {
-      const invitation = await Invitation.findOne({ invitedEmail: email, accepted: false });
-      if (!invitation) {
-        console.log("No se encontró una invitación para este correo.");
-        return res.status(400).json({ msg: 'No se encontró una invitación para este correo; no puedes registrarte como paciente' });
+      let invitation;
+      if (invitationId) {
+        // Buscar por ID de invitación
+        invitation = await Invitation.findOne({ _id: invitationId, accepted: false });
+      } else {
+        // Fallback: buscar por email normalizado
+        const normalizedEmail = email.trim().toLowerCase();
+        invitation = await Invitation.findOne({ email: normalizedEmail, accepted: false });
       }
-      // Marcar la invitación como aceptada para que no se pueda reutilizar
+      if (!invitation) {
+        console.log('No se encontró una invitación válida.');
+        return res.status(400).json({ msg: 'No tienes una invitación válida para registrarte como paciente' });
+      }
+      // Sellar la invitación para que no pueda reutilizarse
       invitation.accepted = true;
       await invitation.save();
       assignedTherapist = invitation.therapist;
@@ -43,7 +52,7 @@ exports.register = async (req, res) => {
       return res.status(400).json({ msg: 'Formato de fecha inválido' });
     }
 
-    // Crear el nuevo usuario y, si es paciente, asignar el terapeuta
+    // Crear y guardar el usuario
     user = new User({
       nombre,
       apellidos,
@@ -51,7 +60,7 @@ exports.register = async (req, res) => {
       email,
       password,
       role,
-      assignedTherapist: assignedTherapist  // Esto será null si no es paciente
+      assignedTherapist
     });
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
@@ -65,16 +74,14 @@ exports.register = async (req, res) => {
       html: '<p>Gracias por registrarte. ¡Bienvenido!</p>'
     });
 
-    // Generamos el token incluyendo el rol
+    // Generar y devolver token con rol
     const token = generateToken(user.id, user.role.toLowerCase());
-    // Devolvemos tanto el token como el rol para que el frontend redirija adecuadamente
     res.status(201).json({ token, role: user.role });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Error en el servidor');
   }
 };
-
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
@@ -88,7 +95,6 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ msg: 'Credenciales inválidas' });
     }
-    // Convertir el rol a minúsculas antes de generar el token
     const token = generateToken(user.id, user.role.toLowerCase());
     res.json({ token, role: user.role.toLowerCase() });
   } catch (err) {
@@ -106,7 +112,7 @@ exports.forgotPassword = async (req, res) => {
     }
 
     const resetToken = generateResetToken(user._id);
-    const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
+    const resetUrl = `https://localhost:8080/reset-password?token=${resetToken}`;
 
     await sendEmail({
       to: user.email,

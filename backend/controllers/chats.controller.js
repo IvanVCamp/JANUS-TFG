@@ -62,7 +62,7 @@ exports.sendMessage = async (req, res) => {
   // Si hay archivo, asignar la URL completa
   if (req.file) {
     // Ajusta localhost:5000 si tu backend corre en otro host/puerto
-    fileUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+    fileUrl = `https://localhost:8080/uploads/${req.file.filename}`;
     fileName = req.file.originalname;
   }
 

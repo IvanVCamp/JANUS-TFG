@@ -66,7 +66,7 @@ function TimeMachineGame() {
       const fetchSnapshot = async () => {
         try {
           const token = localStorage.getItem('token');
-          const response = await axios.get(`http://localhost:5000/api/game?patientId=${queryPatientId}`, {
+          const response = await axios.get(`https://localhost:8080/api/game?patientId=${queryPatientId}`, {
             headers: { 'x-auth-token': token }
           });
           if (response.data && response.data.length > 0) {
@@ -173,7 +173,7 @@ function TimeMachineGame() {
         }))
     };
     try {
-      await axios.post('http://localhost:5000/api/game', payload, {
+      await axios.post('https://localhost:8080/api/game', payload, {
         headers: { 'x-auth-token': token }
       });
       alert('¡Tu día ha sido guardado!');
