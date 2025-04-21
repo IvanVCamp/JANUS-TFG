@@ -12,6 +12,9 @@ import EmotionsDiary from './components/EmotionsDiary';
 import MiPlaneta from './components/MiPlaneta';
 import TherapistDashboard from './components/TherapistDashboard';
 import PatientsList from './components/PatientsList';
+import TherapistRoutines from './components/TherapistRoutines';
+import PatientRoutines from './components/PatientRoutines';
+
 
 function App() {
   return (
@@ -29,6 +32,8 @@ function App() {
         <Route path="/mi-planeta" element={<MiPlaneta />} />
         <Route path="/therapist" element={<TherapistDashboard />} />
         <Route path="/therapist/patients" element={<PatientsList />} />
+        <Route path="/therapist/routines" element={<TherapistRoutines />} />
+        <Route path="/therapist/routines/:patientId" element={<PatientRoutines />} />
         </Routes>
     </Router>
   );

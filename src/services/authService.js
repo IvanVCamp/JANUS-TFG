@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://localhost:8080/api/auth';
+const API_URL = '/api/auth';
 
 const authService = {
   login: (credentials) => axios.post(`${API_URL}/login`, credentials),

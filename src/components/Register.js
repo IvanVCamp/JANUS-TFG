@@ -56,7 +56,7 @@ function Register() {
             };
 
         const response = await axios.get(
-          `https://localhost:8080/api/invitations?${params}`,
+          `/api/invitations?${params}`,
           { headers }
         );
 

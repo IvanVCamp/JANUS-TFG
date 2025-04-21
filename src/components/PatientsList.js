@@ -21,7 +21,7 @@ function PatientsList() {
     const fetchPatients = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('https://localhost:8080/api/therapist/patients', {
+        const response = await axios.get('/api/therapist/patients', {
           headers: { 'x-auth-token': token }
         });
         setPatients(response.data);
@@ -38,7 +38,7 @@ function PatientsList() {
   const fetchTimeMachineResult = async (patientId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`https://localhost:8080/api/game?patientId=${patientId}`, {
+      const response = await axios.get(`/api/game?patientId=${patientId}`, {
         headers: { 'x-auth-token': token }
       });
       if (response.data && response.data.length > 0) {
@@ -56,7 +56,7 @@ function PatientsList() {
   const fetchPlanetMapResult = async (patientId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`https://localhost:8080/api/planet-map?patientId=${patientId}`, {
+      const response = await axios.get(`/api/planet-map?patientId=${patientId}`, {
         headers: { 'x-auth-token': token }
       });
       if (response.data) {

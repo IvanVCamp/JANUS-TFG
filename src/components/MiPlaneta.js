@@ -45,7 +45,7 @@ function MiPlaneta() {
       const fetchSnapshot = async () => {
         try {
           const token = localStorage.getItem('token');
-          const response = await axios.get(`https://localhost:8080/api/planet-map?patientId=${queryPatientId}`, {
+          const response = await axios.get(`/api/planet-map?patientId=${queryPatientId}`, {
             headers: { 'x-auth-token': token }
           });
           if (response.data && response.data.elements) {
@@ -162,7 +162,7 @@ function MiPlaneta() {
     try {
       const token = localStorage.getItem('token');
       const payload = { elements: planetElements };
-      await axios.post('https://localhost:8080/api/planet-map', payload, {
+      await axios.post('/api/planet-map', payload, {
         headers: { 'x-auth-token': token }
       });
       alert('Planeta guardado exitosamente.');
