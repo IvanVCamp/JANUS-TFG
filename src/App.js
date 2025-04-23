@@ -14,7 +14,8 @@ import TherapistDashboard from './components/TherapistDashboard';
 import PatientsList from './components/PatientsList';
 import TherapistRoutines from './components/TherapistRoutines';
 import PatientRoutines from './components/PatientRoutines';
-
+import TherapistInterests from './components/TherapistInterests';
+import PatientInterests from './components/PatientInterests';
 
 function App() {
   return (
@@ -34,6 +35,8 @@ function App() {
         <Route path="/therapist/patients" element={<PatientsList />} />
         <Route path="/therapist/routines" element={<TherapistRoutines />} />
         <Route path="/therapist/routines/:patientId" element={<PatientRoutines />} />
+        <Route path="/therapist/interests" element={<TherapistInterests />} />
+        <Route path="/therapist/interests/:patientId" element={<PatientInterests />} />
         </Routes>
     </Router>
   );

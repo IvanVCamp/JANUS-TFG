@@ -55,7 +55,7 @@ function EmotionsDiary() {
       // En modo interactivo, cargamos las actividades a partir de los resultados de la Máquina del Tiempo
       const token = localStorage.getItem('token');
       axios
-        .get('https://localhost:8080/api/game', { headers: { 'x-auth-token': token } })
+        .get('http://localhost:8080/api/game', { headers: { 'x-auth-token': token } })
         .then(response => {
           const gameResults = response.data;
           const activityMap = {};
