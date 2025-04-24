@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/static/css/main.66504340.css",
-    "main.js": "/static/js/main.cf8c7c8f.js",
+    "main.js": "/static/js/main.0caffef5.js",
     "static/media/bg-texture.png": "/static/media/bg-texture.ca692d0a0698f04f8f88.png",
     "static/media/planet.png": "/static/media/planet.d243ee7501c1aa062f34.png",
     "static/media/janus-logo.png": "/static/media/janus-logo.cfa53025a4ee4dae6713.png",
     "index.html": "/index.html",
     "main.66504340.css.map": "/static/css/main.66504340.css.map",
-    "main.cf8c7c8f.js.map": "/static/js/main.cf8c7c8f.js.map"
+    "main.0caffef5.js.map": "/static/js/main.0caffef5.js.map"
   },
   "entrypoints": [
     "static/css/main.66504340.css",
-    "static/js/main.cf8c7c8f.js"
+    "static/js/main.0caffef5.js"
   ]
 }
