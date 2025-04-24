@@ -131,15 +131,29 @@ export default function PatientRoutines() {
     const fragmentation = slots.reduce((acc, slot, idx, arr) => {
       if (idx === 0) return acc;
       const prev = arr[idx - 1];
-      const prevAct = prev.activities && prev.activities.length ? prev.activities[0] : null;
-      const currAct = slot.activities && slot.activities.length ? slot.activities[0] : null;
+      const prevAct = prev.activities?.[0] || null;
+      const currAct = slot.activities?.[0] || null;
+      const prevCat = prevAct ? categoryMap[prevAct.activityId] : null;
+      const currCat = currAct ? categoryMap[currAct.activityId] : null;
+      return (prevCat && currCat && prevCat !== currCat) ? acc + 1 : acc;
+    }, 0);
+
+    // Transitions details
+    const transitions = slots.slice(1).reduce((acc, slot, idx) => {
+      const prev = slots[idx];
+      const prevAct = prev.activities?.[0] || null;
+      const currAct = slot.activities?.[0] || null;
       const prevCat = prevAct ? categoryMap[prevAct.activityId] : null;
       const currCat = currAct ? categoryMap[currAct.activityId] : null;
       if (prevCat && currCat && prevCat !== currCat) {
-        return acc + 1;
+        acc.push({
+          time: slot.slot,
+          from: prevAct.title,
+          to: currAct.title
+        });
       }
       return acc;
-    }, 0);
+    }, []);
 
     // Balance index (inverse entropy-like)
     const N = distribution.length;
@@ -166,6 +180,7 @@ export default function PatientRoutines() {
       diversity,
       consistency,
       fragmentation,
+      transitions,
       groupBalance: distribution,
       balanceIndex,
       top3,
@@ -221,8 +236,7 @@ export default function PatientRoutines() {
         });
         return ALL_CATEGORIES.map(name => ({
           category: name,
-          Wed: +(catSum[name]/60).toFixed(2),
-          Sat: 0
+          Wed: +(catSum[name]/60).toFixed(2)
         }));
       };
       const wedHours = computeHours(wedRecord);
@@ -406,6 +420,22 @@ export default function PatientRoutines() {
           </>
         )}
       </section>
+
+      {metrics && metrics.transitions && metrics.transitions.length > 0 && (
+        <section className="chart-block full-width">
+          <h3>Detalles de Fragmentación</h3>
+          <p className="chart-description">
+            Cambios de actividad entre franjas horarias consecutivas:
+          </p>
+          <ul>
+            {metrics.transitions.map((t, i) => (
+              <li key={i}>
+                A las <strong>{t.time}</strong> cambió de <em>{t.from}</em> a <em>{t.to}</em>.
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }
