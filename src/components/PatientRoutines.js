@@ -3,25 +3,49 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import {
+  ResponsiveContainer,
   PieChart, Pie, Cell, Tooltip, Legend,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   RadialBarChart, RadialBar,
-  ResponsiveContainer
+  LineChart, Line
 } from 'recharts';
 import '../styles/therapistRoutines.css';
 
-const categoryMap = {
-  futbol: 'Ocio', dibujos: 'Ocio', comics: 'Ocio', tarea: 'Obligaciones',
-  videojuegos: 'Ocio', helado: 'Ocio', parque: 'Ocio', banio: 'Autocuidado',
-  dormir: 'Autocuidado', musica: 'Ocio', bailar: 'Ocio', amigos: 'Ocio',
-  bicicleta: 'Ocio', dibujar: 'Ocio', mascotas: 'Ocio', experimentos: 'Obligaciones',
-  cantar: 'Ocio', lego: 'Ocio', nadar: 'Autocuidado', computadora: 'Ocio'
-};
-const groupMap = { Autocuidado:'Autocuidado', Obligaciones:'Obligaciones', Ocio:'Ocio' };
-const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE'];
+// Fixed list of categories (in lowercase)
+const ALL_CATEGORIES = [
+  'cuidado personal',
+  'actividades escolares',
+  'juego y tiempo libre',
+  'participación comunitaria',
+  'descanso y sueño'
+];
 
-function PatientRoutines() {
+// Map activityId ➔ category
+const categoryMap = {
+  futbol: 'juego y tiempo libre',
+  dibujos: 'juego y tiempo libre',
+  comics: 'juego y tiempo libre',
+  tarea: 'actividades escolares',
+  videojuegos: 'juego y tiempo libre',
+  helado: 'juego y tiempo libre',
+  parque: 'participación comunitaria',
+  banio: 'cuidado personal',
+  dormir: 'descanso y sueño',
+  musica: 'juego y tiempo libre',
+  bailar: 'juego y tiempo libre',
+  amigos: 'participación comunitaria',
+  bicicleta: 'juego y tiempo libre',
+  dibujar: 'juego y tiempo libre',
+  mascotas: 'juego y tiempo libre',
+  experimentos: 'actividades escolares',
+  cantar: 'juego y tiempo libre',
+  lego: 'juego y tiempo libre',
+  nadar: 'cuidado personal',
+  computadora: 'juego y tiempo libre'
+};
+
+export default function PatientRoutines() {
   const { patientId } = useParams();
   const [results, setResults] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -29,10 +53,12 @@ function PatientRoutines() {
   const [to, setTo] = useState('');
   const [selected, setSelected] = useState(null);
   const [metrics, setMetrics] = useState(null);
+  const [multi, setMulti] = useState(null);
 
+  // Fetch all game results for patient
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios.get(`http://localhost:8080/api/game?patientId=${patientId}`, {
+    axios.get(`/api/game?patientId=${patientId}`, {
       headers: { 'x-auth-token': token }
     }).then(({ data }) => {
       setResults(data);
@@ -44,104 +70,128 @@ function PatientRoutines() {
     }).catch(console.error);
   }, [patientId]);
 
+  // Filter results by date range
   useEffect(() => {
-    if (!from||!to) return;
+    if (!from || !to) return;
     const f = new Date(from), t = new Date(to);
     t.setHours(23,59,59,999);
     setFiltered(results.filter(r => {
       const d = new Date(r.createdAt);
-      return d>=f && d<=t;
+      return d >= f && d <= t;
     }));
   }, [results, from, to]);
 
+  // Default select first available day
   useEffect(() => {
     setSelected(filtered.length ? filtered[0].createdAt : null);
   }, [filtered]);
 
+  // Compute metrics for selected day
   useEffect(() => {
     if (!selected) return;
     const res = filtered.find(r => r.createdAt === selected);
     if (!res) return;
 
-    // Flatten activities
     const slots = res.timeSlots || [];
-    const acts = slots.flatMap(s => (s.activities||[]).map(a=>({...a, slot: s.slot})));
-    if (!acts.length) return;
+    const acts = slots.flatMap(s => s.activities || []);
+    const totalMin = acts.reduce((sum,a) => sum + a.duration, 0) || 1;
 
-    const totalMin = acts.reduce((sum,a)=>sum+a.duration,0);
-    const n = acts.length;
-
-    // Basic stats
-    const durations = acts.map(a=>a.duration);
-    const avgDuration = +(totalMin/n).toFixed(2);
-    const sortedD = [...durations].sort((a,b)=>a-b);
-    const median = n%2===0
-      ? +(((sortedD[n/2-1]+sortedD[n/2])/2).toFixed(2))
-      : sortedD[Math.floor(n/2)];
-    const minDur = sortedD[0];
-    const maxDur = sortedD[n-1];
-    const variance = durations.reduce((acc,d)=>acc+(d-avgDuration)**2,0)/n;
-    const stdDev = +Math.sqrt(variance).toFixed(2);
-
-    // Total hours
-    const totalHours = +(totalMin/60).toFixed(2);
-
-    // Slot durations
-    const slotDurations = slots.map(s => {
-      const mins = (s.activities||[]).reduce((sum,a)=>sum+a.duration,0);
-      return { slot: s.slot, minutes: mins };
-    });
-    const busiest = slotDurations.reduce((max,c)=>c.minutes>max.minutes?c:max, slotDurations[0]);
-    const least = slotDurations.reduce((min,c)=>c.minutes<min.minutes?c:min, slotDurations[0]);
-
-    // Distribution %
+    // Sum minutes per category
     const catSum = {};
-    acts.forEach(a=>{
-      const c = categoryMap[a.activityId]||'Otros';
-      catSum[c] = (catSum[c]||0)+a.duration;
+    ALL_CATEGORIES.forEach(cat => catSum[cat] = 0);
+    acts.forEach(a => {
+      const cat = categoryMap[a.activityId] || null;
+      if (cat && catSum.hasOwnProperty(cat)) {
+        catSum[cat] += a.duration;
+      }
     });
-    const distribution = Object.entries(catSum).map(([name,val])=>({
-      name, value: +(val/totalMin*100).toFixed(1)
+
+    // 1. Distribution % by category (always include all)
+    const distribution = ALL_CATEGORIES.map(name => ({
+      name,
+      value: +((catSum[name] / totalMin * 100) || 0).toFixed(1)
     }));
 
-    // Hours per category
-    const hours = Object.entries(catSum).map(([name,val])=>({
-      name, hours: +(val/60).toFixed(2)
+    // 2. Hours by category
+    const hours = ALL_CATEGORIES.map(name => ({
+      name,
+      hours: +(catSum[name] / 60).toFixed(2)
     }));
 
-    // Diversity & consistency
-    const diversity = new Set(acts.map(a=>a.activityId)).size;
-    const occupiedSlots = slots.filter(s=>s.activities?.length>0).length;
-    const consistency = +((occupiedSlots/slots.length*100).toFixed(1));
+    // 3. Diversity (# unique activities)
+    const diversity = new Set(acts.map(a => a.activityId)).size;
 
-    // Group balance
-    const grpSum = {Autocuidado:0,Obligaciones:0,Ocio:0};
-    acts.forEach(a=> grpSum[groupMap[categoryMap[a.activityId]||'Ocio']] += a.duration);
-    const groupBalance = Object.entries(grpSum).map(([subject,val])=>({
-      subject, value: +(val/totalMin*100).toFixed(1)
-    }));
+    // 4. Consistency (% slots occupied)
+    const occupiedSlots = slots.filter(s => s.activities?.length > 0).length;
+    const consistency = +((occupiedSlots / 24 * 100).toFixed(1));
 
-    // Balance index
+    // 5. Category balance radar (reuse distribution)
+    const groupBalance = distribution;
+
+    // 6. Balance index (inverse entropy)
     const N = distribution.length;
-    const uniform = 100/N;
-    const distDiff = distribution.reduce((acc,d)=>acc+Math.abs(d.value-uniform),0)/2;
-    const balanceIndex = +((100-distDiff)/100*100).toFixed(1);
+    const uniform = 100 / N;
+    const distDiff = distribution.reduce((acc,d) =>
+      acc + Math.abs(d.value - uniform), 0) / 2;
+    const balanceIndex = +((100 - distDiff) / 100 * 100).toFixed(1);
 
-    // Top3
+    // 7. Top 3 activities by time
     const actSum = {};
-    acts.forEach(a=> actSum[a.activityId]=(actSum[a.activityId]||0)+a.duration);
+    acts.forEach(a => {
+      actSum[a.activityId] = (actSum[a.activityId]||0) + a.duration;
+    });
     const top3 = Object.entries(actSum)
-      .sort((a,b)=>b[1]-a[1]).slice(0,3)
-      .map(([id,val])=>({ name: id, hours: +(val/60).toFixed(2) }));
+      .sort((a,b) => b[1] - a[1]).slice(0,3)
+      .map(([id,val]) => ({ name: id, hours: +(val/60).toFixed(2) }));
+
+    // 8. Sleep hours
+    const sleepMin = catSum['descanso y sueño'];
+    const sleepHours = +(sleepMin / 60).toFixed(2);
 
     setMetrics({
-      totalHours, avgDuration, median, minDur, maxDur, stdDev,
-      busiest, least,
-      distribution, hours,
-      diversity, consistency, groupBalance, balanceIndex, top3,
-      slotDurations
+      distribution, hours, diversity, consistency,
+      groupBalance, balanceIndex, top3, sleepHours
     });
   }, [selected, filtered]);
+
+  // Compute multi-day metrics
+  useEffect(() => {
+    if (!filtered.length) {
+      setMulti(null);
+      return;
+    }
+    // Sleep over days
+    const sleepData = filtered.map(r => {
+      const date = new Date(r.createdAt).toLocaleDateString();
+      const sleepMin = r.timeSlots.reduce((sum, slot) => {
+        const entry = slot.activities?.find(a => a.activityId === 'dormir');
+        return sum + (entry ? entry.duration : 0);
+      }, 0);
+      return { date, hours: +(sleepMin/60).toFixed(2) };
+    });
+    // Variance of category distribution
+    const dayPercents = filtered.map(r => {
+      const acts = r.timeSlots.flatMap(s => s.activities || []);
+      const total = acts.reduce((sum,a)=>sum+a.duration,0)||1;
+      const sums = {};
+      ALL_CATEGORIES.forEach(cat => sums[cat]=0);
+      acts.forEach(a => {
+        const cat = categoryMap[a.activityId] || null;
+        if (cat) sums[cat] += a.duration;
+      });
+      return ALL_CATEGORIES.reduce((obj,cat) => {
+        obj[cat] = +(sums[cat]/total*100).toFixed(1);
+        return obj;
+      }, {});
+    });
+    const categoryVariance = ALL_CATEGORIES.map(cat => {
+      const vals = dayPercents.map(d => d[cat]);
+      const mean = vals.reduce((a,b)=>a+b,0)/vals.length;
+      const varr = vals.reduce((acc,v)=>acc+(v-mean)**2,0)/vals.length;
+      return { category: cat, variance: +varr.toFixed(2) };
+    });
+    setMulti({ sleepData, categoryVariance });
+  }, [filtered]);
 
   return (
     <div className="routines-container">
@@ -150,44 +200,75 @@ function PatientRoutines() {
         <h2>Estadísticas de Rutinas</h2>
       </header>
 
+      {/* Filters */}
       <section className="filter-section">
         <label>Desde:<input type="date" value={from} onChange={e=>setFrom(e.target.value)} /></label>
         <label>Hasta:<input type="date" value={to} onChange={e=>setTo(e.target.value)} /></label>
         <label>Día:
           <select value={selected||''} onChange={e=>setSelected(e.target.value)}>
-            {filtered.map(r=><option key={r.createdAt} value={r.createdAt}>
-              {new Date(r.createdAt).toLocaleDateString()}
-            </option>)}
+            {filtered.map(r => {
+              const d = new Date(r.createdAt).toLocaleDateString();
+              return <option key={r.createdAt} value={r.createdAt}>{d}</option>;
+            })}
           </select>
         </label>
       </section>
 
-      {metrics ? (
+      {/* Single-day metrics */}
+      {metrics && (
         <>
           <div className="metrics-grid">
-            <div className="metric-card">Total Horas: <strong>{metrics.totalHours}</strong></div>
-            <div className="metric-card">Duración Media (min): <strong>{metrics.avgDuration}</strong></div>
-            <div className="metric-card">Mediana (min): <strong>{metrics.median}</strong></div>
-            <div className="metric-card">Mín/Max (min): <strong>{metrics.minDur}/{metrics.maxDur}</strong></div>
-            <div className="metric-card">Desviación (min): <strong>{metrics.stdDev}</strong></div>
-            <div className="metric-card">Diversidad: <strong>{metrics.diversity}</strong></div>
-            <div className="metric-card">Consistencia: <strong>{metrics.consistency}%</strong></div>
-            <div className="metric-card">Índice Equilibrio: <strong>{metrics.balanceIndex}%</strong></div>
-            <div className="metric-card">Franja más activa: <strong>{metrics.busiest.slot}</strong></div>
-            <div className="metric-card">Franja menos activa: <strong>{metrics.least.slot}</strong></div>
+            <div className="metric-card">
+              <span>Diversidad: <strong>{metrics.diversity}</strong></span>
+              <i
+                className="fa fa-info-circle info-icon"
+                title="Número de actividades distintas realizadas en el día. Se calcula contando actividades con ID único."
+              ></i>
+            </div>
+            <div className="metric-card">
+              <span>Consistencia: <strong>{metrics.consistency}%</strong></span>
+              <i
+                className="fa fa-info-circle info-icon"
+                title="Porcentaje de franjas horarias (de 24 posibles) en las que se realizó al menos una actividad: (franjas ocupadas/24)×100."
+              ></i>
+            </div>
+            <div className="metric-card">
+              <span>Equilibrio: <strong>{metrics.balanceIndex}%</strong></span>
+              <i
+                className="fa fa-info-circle info-icon"
+                title="Índice de equilibrio de tiempo entre categorías. Se basa en la diferencia respecto a una distribución uniforme de % por categoría."
+              ></i>
+            </div>
+            <div className="metric-card">
+              <span>Sueño (h): <strong>{metrics.sleepHours}</strong></span>
+              <i
+                className="fa fa-info-circle info-icon"
+                title="Total de horas dedicadas a 'descanso y sueño'. Minutos de sueño ÷ 60."
+              ></i>
+            </div>
           </div>
 
           <div className="charts-grid">
+            {/* Distribution Pie */}
             <div className="chart-block">
               <h3>Distribución % por Categoría</h3>
+              <p className="chart-description">
+                Muestra el porcentaje del tiempo total del día dedicado a cada categoría.
+                Calculado como (minutos en categoría / total minutos del día) × 100.
+              </p>
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
-                    data={metrics.distribution} dataKey="value" nameKey="name"
-                    cx="50%" cy="50%" outerRadius={80} label
+                    data={metrics.distribution}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    label
                   >
-                    {metrics.distribution.map((_,i)=>
-                      <Cell key={i} fill={COLORS[i%COLORS.length]} />
+                    {metrics.distribution.map((_,i) =>
+                      <Cell key={i} fill={['#8884d8','#82ca9d','#ffc658','#ff8042','#0088FE'][i%5]} />
                     )}
                   </Pie>
                   <Tooltip /><Legend />
@@ -195,78 +276,102 @@ function PatientRoutines() {
               </ResponsiveContainer>
             </div>
 
+            {/* Hours Bar */}
             <div className="chart-block">
               <h3>Horas por Categoría</h3>
+              <p className="chart-description">
+                Representa las horas empleadas en cada categoría, convirtiendo minutos a horas.
+              </p>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={metrics.hours} margin={{ top:20,right:30,left:0,bottom:0 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="hours" fill={COLORS[1]} />
+                  <Bar dataKey="hours" fill="#8884d8" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
+            {/* Radar Balance */}
             <div className="chart-block">
-              <h3>Balance Grupo (Radar)</h3>
+              <h3>Balance de Categorías</h3>
+              <p className="chart-description">
+                Un radar muestra el equilibrio relativo entre categorías basado en distribución %.
+              </p>
               <ResponsiveContainer width="100%" height={250}>
                 <RadarChart data={metrics.groupBalance} cx="50%" cy="50%" outerRadius={80}>
                   <PolarGrid />
-                  <PolarAngleAxis dataKey="subject" />
+                  <PolarAngleAxis dataKey="name" />
                   <PolarRadiusAxis domain={[0,100]} />
-                  <Radar dataKey="value" stroke={COLORS[2]} fill={COLORS[2]} fillOpacity={0.6}/>
-                  <Tooltip/>
+                  <Radar dataKey="value" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6}/>
+                  <Tooltip />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
 
-            <div className="chart-block">
-              <h3>Top 3 Actividades por Tiempo</h3>
+            {/* Top 3 */}
+            <div className="chart-block full-width">
+              <h3>Top 3 Actividades</h3>
+              <p className="chart-description">
+                Lista las tres actividades con más tiempo invertido en el día seleccionado.
+              </p>
               <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={metrics.top3} layout="vertical" margin={{ top:10,right:30,left:50,bottom:5 }}>
+                <BarChart
+                  data={metrics.top3}
+                  layout="vertical"
+                  margin={{ top:10,right:30,left:50,bottom:5 }}
+                >
                   <CartesianGrid strokeDasharray="3 3"/>
                   <XAxis type="number"/>
                   <YAxis dataKey="name" type="category"/>
                   <Tooltip/>
-                  <Bar dataKey="hours" fill={COLORS[3]} />
+                  <Bar dataKey="hours" fill="#ffc658" />
                 </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="chart-block">
-              <h3>Tiempo por Franja Horaria</h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={metrics.slotDurations} margin={{ top:20,right:30,left:0,bottom:0 }}>
-                  <XAxis dataKey="slot" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="minutes" fill={COLORS[4]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="chart-block full-width">
-              <h3>Índice de Equilibrio (%)</h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <RadialBarChart
-                  cx="50%" cy="50%" innerRadius="60%" outerRadius="100%"
-                  data={[{ name:'Equilibrio', value: metrics.balanceIndex }]}
-                  startAngle={180} endAngle={0}
-                >
-                  <RadialBar minAngle={15} background clockWise dataKey="value" />
-                  <Legend iconSize={10} layout="vertical" verticalAlign="middle" align="right"/>
-                  <Tooltip/>
-                </RadialBarChart>
               </ResponsiveContainer>
             </div>
           </div>
         </>
-      ) : (
-        <p style={{ padding: '20px' }}>Selecciona un día para ver estadísticas</p>
+      )}
+
+      {/* Multi-day metrics */}
+      {multi && (
+        <div className="charts-grid">
+          {/* Sleep trend */}
+          <div className="chart-block">
+            <h3>Tendencia de Sueño</h3>
+            <p className="chart-description">
+              Línea muestra las horas de sueño cada día en el rango seleccionado.
+            </p>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={multi.sleepData} margin={{ top:10,right:30,left:0,bottom:0 }}>
+                <CartesianGrid strokeDasharray="3 3"/>
+                <XAxis dataKey="date"/>
+                <YAxis/>
+                <Tooltip/>
+                <Line type="monotone" dataKey="hours" stroke="#8884d8" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Category variance */}
+          <div className="chart-block">
+            <h3>Variabilidad por Categoría</h3>
+            <p className="chart-description">
+              Muestra la varianza porcentual diaria de cada categoría durante el período.
+            </p>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={multi.categoryVariance} margin={{ top:20,right:30,left:0,bottom:0 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="category"/>
+                <YAxis/>
+                <Tooltip/>
+                <Bar dataKey="variance" fill="#ff8042" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       )}
     </div>
   );
 }
-
-export default PatientRoutines;

@@ -1,155 +1,130 @@
-// src/components/PatientInterests.js
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import {
-  ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, Tooltip, Legend,
-  PieChart, Pie, Cell
+    ResponsiveContainer,
+    PieChart, Pie, Cell, Tooltip, Legend,
+    BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts';
 import '../styles/therapistRoutines.css';
 
 export default function PatientInterests() {
-  const { patientId } = useParams();
-  const [diary, setDiary] = useState(undefined);
+    const { patientId } = useParams();
+  const [mapData, setMapData] = useState(null);
   const [metrics, setMetrics] = useState(null);
 
-  // Map activityId ➔ category
-  const categoryMap = {
-    futbol: 'Ocio',
-    dibujos: 'Ocio',
-    comics: 'Ocio',
-    tarea: 'Obligaciones',
-    videojuegos: 'Ocio',
-    helado: 'Ocio',
-    parque: 'Ocio',
-    banio: 'Autocuidado',
-    dormir: 'Autocuidado',
-    musica: 'Ocio',
-    bailar: 'Ocio',
-    amigos: 'Ocio',
-    bicicleta: 'Ocio',
-    dibujar: 'Ocio',
-    mascotas: 'Ocio',
-    experimentos: 'Obligaciones',
-    cantar: 'Ocio',
-    lego: 'Ocio',
-    nadar: 'Autocuidado',
-    computadora: 'Ocio'
+  // Map de elemento ➔ dominio OT
+  const domainMap = {
+    estadio:    'Actividad Física',
+    parque:     'Ocio',
+    colegio:    'Productividad',
+    biblioteca: 'Productividad',
+    hospital:   'Autocuidado'
   };
 
+  // Colores para gráficos
+  const DOMAIN_COLORS = ['#8884d8','#82ca9d','#ffc658','#ff8042'];
+  const SIZE_COLORS   = ['#ff8042','#ffc658','#82ca9d'];
+
   useEffect(() => {
-    const fetchDiary = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const { data } = await axios.get(`/api/emotions?patientId=${patientId}`, {
-          headers: { 'x-auth-token': token }
-        });
-        setDiary(data && data.length > 0 ? data[0].diary : null);
-      } catch {
-        setDiary(null);
-      }
+    const fetchMap = async () => {
+      const token = localStorage.getItem('token');
+      const { data } = await axios.get(`/api/planet-map?patientId=${patientId}`, {
+        headers: { 'x-auth-token': token }
+      });
+      setMapData(data);
     };
-    fetchDiary();
+    fetchMap();
   }, [patientId]);
 
   useEffect(() => {
-    if (!Array.isArray(diary) || diary.length === 0) return;
+    if (!mapData?.elements) return;
+    const elems     = mapData.elements;
+    const total     = elems.length;
+    const domains   = [...new Set(Object.values(domainMap))];
 
-    const ratings = diary.map(e => e.rating);
-    const n = ratings.length;
-    const sum = ratings.reduce((a, b) => a + b, 0);
-    const average = +(sum / n).toFixed(2);
-
-    // Min, Max
-    const minRating = Math.min(...ratings);
-    const maxRating = Math.max(...ratings);
-
-    // Median
-    const sorted = [...ratings].sort((a, b) => a - b);
-    const mid = Math.floor(n / 2);
-    const median = n % 2 === 0
-      ? +(((sorted[mid - 1] + sorted[mid]) / 2).toFixed(2))
-      : sorted[mid];
-
-    // Mode
-    const freq = {};
-    ratings.forEach(r => (freq[r] = (freq[r] || 0) + 1));
-    const mode = +Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0];
-
-    // Std dev
-    const variance = ratings.reduce((acc, r) => acc + (r - average) ** 2, 0) / n;
-    const stdDev = +Math.sqrt(variance).toFixed(2);
-
-    // Distribution 1–5
-    const distribution = [1, 2, 3, 4, 5].map(r => ({
-      rating: r,
-      count: freq[r] || 0
-    }));
-
-    // Positive / Neutral / Negative
-    const pos = distribution.filter(d => d.rating >= 4).reduce((a, d) => a + d.count, 0);
-    const neu = distribution.find(d => d.rating === 3).count;
-    const neg = distribution.filter(d => d.rating <= 2).reduce((a, d) => a + d.count, 0);
-    const pnDistribution = [
-      { category: 'Positivo (4–5)', value: pos },
-      { category: 'Neutral (3)',      value: neu },
-      { category: 'Negativo (1–2)',  value: neg }
-    ];
-
-    // Activities data
-    const activities = diary.map(e => ({ name: e.title, rating: e.rating }));
-
-    // Unique activities & category variety
-    const uniqueActivities = new Set(diary.map(e => e.activityId)).size;
-    const catCounts = {};
-    const catSums = {};
-    diary.forEach(e => {
-      const cat = categoryMap[e.activityId] || 'Otros';
-      catCounts[cat] = (catCounts[cat] || 0) + 1;
-      catSums[cat]   = (catSums[cat]   || 0) + e.rating;
+    // 1) Conteo y suma de tamaños por dominio
+    const countByDom = {}, sumSizeByDom = {};
+    domains.forEach(d => { countByDom[d] = 0; sumSizeByDom[d] = 0; });
+    elems.forEach(el => {
+      const dom = domainMap[el.elementId] || 'Otro';
+      countByDom[dom]  = (countByDom[dom] || 0) + 1;
+      sumSizeByDom[dom]= (sumSizeByDom[dom] || 0) + el.size;
     });
-    const categoryDistribution = Object.entries(catCounts).map(([category, count]) => ({ category, count }));
-    const categoryAvg = Object.entries(catSums).map(([category, sum]) => ({
-      category,
-      avg: +(sum / catCounts[category]).toFixed(2)
-    }));
-    const categoryVariety = Object.keys(catCounts).length;
 
-    // Top 3 & bottom 3 activities by rating
-    const sortedActs = [...activities].sort((a, b) => b.rating - a.rating);
-    const top3 = sortedActs.slice(0, 3);
-    const bottom3 = sortedActs.slice(-3).reverse();
+    // 2) % Distribución por dominio
+    const distribution = domains.map((d) => ({
+      name:  d,
+      value: +((countByDom[d]/total)*100).toFixed(1)
+    }));
+
+    // 3) Tamaño promedio por dominio
+    const avgSizeByDom = domains.map(d => ({
+      name: d,
+      avg: countByDom[d] > 0
+        ? +(sumSizeByDom[d]/countByDom[d]).toFixed(2)
+        : 0
+    }));
+
+    // 4) Desviación estándar de distribución (%)
+    const meanPct = 100/domains.length;
+    const variance = distribution.reduce((acc, {value}) =>
+      acc + Math.pow(value-meanPct, 2), 0
+    ) / domains.length;
+    const stdDevDist = +Math.sqrt(variance).toFixed(1);
+
+    // 5) Dominios subutilizados (0 elementos)
+    const underused = distribution.filter(d => d.value === 0).length;
+
+    // 6) Engagement global por dominio
+    const engagement = {};
+    distribution.forEach(d => { engagement[d.name] = d.value; });
+
+    // 7) Distribución de niveles de preferencia (tamaño)
+    const lowCount  = elems.filter(e => e.size===1).length;
+    const medCount  = elems.filter(e => e.size===2).length;
+    const highCount = elems.filter(e => e.size===3).length;
+    const sizeDist = [
+      { name:'Baja (1)',  value: lowCount  },
+      { name:'Media (2)', value: medCount  },
+      { name:'Alta (3)',  value: highCount }
+    ];
+    const highPct = +((highCount/total)*100).toFixed(1);
+
+    // 8) Índice de Equilibrio Ocupacional
+    const diffSum = distribution.reduce((acc,d) =>
+      acc + Math.abs(d.value - meanPct), 0
+    );
+    const occBalance = +((100 - diffSum/2)).toFixed(1);
+
+    // 9) Top 3 elementos por tamaño
+    const top3 = [...elems]
+      .sort((a,b)=>b.size-a.size)
+      .slice(0,3)
+      .map(el=>({ title: el.title, size: el.size }));
 
     setMetrics({
-      average, median, mode, stdDev, minRating, maxRating,
-      distribution, pnDistribution,
-      activities,
-      uniqueActivities, categoryVariety,
-      categoryDistribution, categoryAvg,
-      top3, bottom3
+      total,
+      stdDevDist,
+      underused,
+      highPct,
+      occBalance,
+      engagement,
+      distribution,
+      avgSizeByDom,
+      sizeDist,
+      top3,
     });
-  }, [diary]);
+  }, [mapData]);
 
-  if (diary === undefined) {
+  if (!mapData) {
     return (
       <div className="routines-container">
         <header className="routines-header">
           <Link to="/therapist/interests">← Volver</Link>
-          <h2>Estadísticas de Emociones</h2>
+          <h2>Intereses – Planet Map</h2>
         </header>
-        <p>Cargando diario…</p>
-      </div>
-    );
-  }
-  if (diary === null) {
-    return (
-      <div className="routines-container">
-        <header className="routines-header">
-          <Link to="/therapist/interests">← Volver</Link>
-          <h2>Estadísticas de Emociones</h2>
-        </header>
-        <p>No hay diario guardado para este paciente.</p>
+        <p>Cargando datos…</p>
       </div>
     );
   }
@@ -158,144 +133,156 @@ export default function PatientInterests() {
       <div className="routines-container">
         <header className="routines-header">
           <Link to="/therapist/interests">← Volver</Link>
-          <h2>Estadísticas de Emociones</h2>
+          <h2>Intereses – Planet Map</h2>
         </header>
-        <p>Calculando estadísticas…</p>
+        <p>Generando estadísticas…</p>
       </div>
     );
   }
-
-  const COLORS = ['#8884d8','#82ca9d','#ffc658','#ff8042','#0088FE'];
-  const PN_COLORS = ['#82ca9d','#ffc658','#ff8042'];
-  const CAT_COLORS = ['#8884d8','#82ca9d','#ffc658','#ff8042'];
 
   return (
     <div className="routines-container">
       <header className="routines-header">
         <Link to="/therapist/interests">← Volver</Link>
-        <h2>Estadísticas de Emociones</h2>
+        <h2>Estadísticas de Planet Map</h2>
       </header>
 
+      {/* Métricas clave */}
       <div className="metrics-grid">
-        <div className="metric-card">Promedio: <strong>{metrics.average}</strong></div>
-        <div className="metric-card">Mediana: <strong>{metrics.median}</strong></div>
-        <div className="metric-card">Moda: <strong>{metrics.mode}</strong></div>
-        <div className="metric-card">Desviación: <strong>{metrics.stdDev}</strong></div>
-        <div className="metric-card">Mín / Máx: <strong>{metrics.minRating} / {metrics.maxRating}</strong></div>
-        <div className="metric-card">Únicas: <strong>{metrics.uniqueActivities}</strong></div>
-        <div className="metric-card">Categorías: <strong>{metrics.categoryVariety}</strong></div>
-        <div className="metric-card">Actividades: <strong>{metrics.activities.length}</strong></div>
+        <div className="metric-card">
+          <span>Total de Elementos: <strong>{metrics.total}</strong></span>
+          <i
+            className="fa fa-info-circle info-icon"
+            title="Número total de elementos que el paciente colocó en su Planet Map."
+          ></i>
+        </div>
+        <div className="metric-card">
+          <span>Desv. Preferencias (%): <strong>{metrics.stdDevDist}</strong></span>
+          <i
+            className="fa fa-info-circle info-icon"
+            title="Desviación estándar de la distribución porcentual entre dominios, mide dispersión de intereses."
+          ></i>
+        </div>
+        <div className="metric-card">
+          <span>Dominios Sin Uso: <strong>{metrics.underused}</strong></span>
+          <i
+            className="fa fa-info-circle info-icon"
+            title="Cantidad de dominios (Autocuidado, Ocio, etc.) en los que no hay ningún elemento."
+          ></i>
+        </div>
+        <div className="metric-card">
+          <span>Alta Preferencia: <strong>{metrics.highPct}%</strong></span>
+          <i
+            className="fa fa-info-circle info-icon"
+            title="Porcentaje de elementos marcados con tamaño 'Alta (3)', refleja intereses fuertes."
+          ></i>
+        </div>
+        <div className="metric-card">
+          <span>Equilibrio Ocup.: <strong>{metrics.occBalance}%</strong></span>
+          <i
+            className="fa fa-info-circle info-icon"
+            title="Índice de equilibrio entre dominios: 100% = distribución perfectamente uniforme."
+          ></i>
+        </div>
       </div>
 
+      {/* Gráficos con descripciones */}
       <div className="charts-grid">
-        {/* Distribución de Puntuaciones */}
         <div className="chart-block">
-          <h3>Distribución de Calificaciones</h3>
+          <h3>Engagement por Dominio</h3>
+          <p className="chart-description">
+            Mide el porcentaje de elementos asignados a cada dominio ocupacional (Autocuidado, Ocio, Productividad, Actividad Física).
+          </p>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={Object.entries(metrics.engagement).map(([name,value])=>({name,value}))}>
+              <CartesianGrid strokeDasharray="3 3"/>
+              <XAxis dataKey="name" />
+              <YAxis unit="%" />
+              <Tooltip/>
+              <Bar dataKey="value" fill="#82ca9d" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="chart-block">
+          <h3>Distribución % por Dominio</h3>
+          <p className="chart-description">
+            Porcentaje del total de elementos colocados que corresponde a cada dominio, identifica dominancias.
+          </p>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
                 data={metrics.distribution}
-                dataKey="count"
-                nameKey="rating"
+                dataKey="value"
+                nameKey="name"
                 cx="50%" cy="50%"
                 outerRadius={80}
                 label
               >
-                {metrics.distribution.map((_,i) =>
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                )}
+                {metrics.distribution.map((_,i)=>(
+                  <Cell key={i} fill={DOMAIN_COLORS[i%DOMAIN_COLORS.length]} />
+                ))}
               </Pie>
-              <Tooltip /><Legend verticalAlign="bottom" />
+              <Tooltip/><Legend verticalAlign="bottom"/>
             </PieChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Pos/Neu/Neg */}
         <div className="chart-block">
-          <h3>Positivo / Neutral / Negativo</h3>
+          <h3>Tamaño Promedio por Dominio</h3>
+          <p className="chart-description">
+            Tamaño medio de los elementos en cada dominio (1=pequeño, 2=mediano, 3=grande), refleja intensidad de preferencia.
+          </p>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={metrics.avgSizeByDom} margin={{top:20,right:30,left:0,bottom:0}}>
+              <CartesianGrid strokeDasharray="3 3"/>
+              <XAxis dataKey="name"/>
+              <YAxis/>
+              <Tooltip/>
+              <Bar dataKey="avg" fill="#ffc658"/>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="chart-block">
+          <h3>Distribución de Preferencias</h3>
+          <p className="chart-description">
+            Cuenta de elementos según nivel de preferencia (Baja/Media/Alta), muestra inclinaciones globales.
+          </p>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
-                data={metrics.pnDistribution}
+                data={metrics.sizeDist}
                 dataKey="value"
-                nameKey="category"
+                nameKey="name"
                 cx="50%" cy="50%"
                 outerRadius={80}
                 label
               >
-                {metrics.pnDistribution.map((_,i) =>
-                  <Cell key={i} fill={PN_COLORS[i % PN_COLORS.length]} />
-                )}
+                {metrics.sizeDist.map((_,i)=>(
+                  <Cell key={i} fill={SIZE_COLORS[i%SIZE_COLORS.length]} />
+                ))}
               </Pie>
-              <Tooltip />
+              <Tooltip/><Legend verticalAlign="bottom"/>
             </PieChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Conteo por Categoría */}
-        <div className="chart-block">
-          <h3>Conteo por Categoría</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={metrics.categoryDistribution} margin={{ top:20, right:30, left:0, bottom:0 }}>
-              <XAxis dataKey="category" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="count" fill={CAT_COLORS[0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Nota Media por Categoría */}
-        <div className="chart-block">
-          <h3>Nota Media por Categoría</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={metrics.categoryAvg} margin={{ top:20, right:30, left:0, bottom:0 }}>
-              <XAxis dataKey="category" />
-              <YAxis domain={[1,5]} />
-              <Tooltip />
-              <Bar dataKey="avg" fill={CAT_COLORS[1]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Calificación por Actividad */}
         <div className="chart-block full-width">
-          <h3>Calificación por Actividad</h3>
-          <ResponsiveContainer width="100%" height={300}>
+          <h3>Top 3 Elementos</h3>
+          <p className="chart-description">
+            Elementos con tamaño más alto, indican intereses más fuertes del paciente.
+          </p>
+          <ResponsiveContainer width="100%" height={200}>
             <BarChart
-              data={metrics.activities}
-              margin={{ top:20, right:30, left:0, bottom:0 }}
+              data={metrics.top3}
+              layout="vertical"
+              margin={{top:10,right:30,left:50,bottom:5}}
             >
-              <XAxis dataKey="name" />
-              <YAxis domain={[1,5]} />
-              <Tooltip />
-              <Bar dataKey="rating" fill="#82ca9d" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Top 3 Actividades */}
-        <div className="chart-block">
-          <h3>Top 3 Actividades</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={metrics.top3} layout="vertical" margin={{ top:10, right:30, left:50, bottom:5 }}>
-              <XAxis type="number" domain={[1,5]} />
-              <YAxis dataKey="name" type="category" />
-              <Tooltip />
-              <Bar dataKey="rating" fill="#ffc658" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Bottom 3 Actividades */}
-        <div className="chart-block">
-          <h3>Peor 3 Actividades</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={metrics.bottom3} layout="vertical" margin={{ top:10, right:30, left:50, bottom:5 }}>
-              <XAxis type="number" domain={[1,5]} />
-              <YAxis dataKey="name" type="category" />
-              <Tooltip />
-              <Bar dataKey="rating" fill="#ff8042" />
+              <XAxis type="number"/>
+              <YAxis dataKey="title" type="category"/>
+              <Tooltip/>
+              <Bar dataKey="size" fill="#8884d8"/>
             </BarChart>
           </ResponsiveContainer>
         </div>

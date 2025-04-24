@@ -2,13 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import '../styles/patientsList.css'; // Reutilizamos el CSS de la tabla
+import '../styles/patientsList.css';
 
 export default function TherapistInterests() {
-  const [patients, setPatients] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [hasDiary, setHasDiary] = useState({});
   const navigate = useNavigate();
+  const [patients, setPatients] = useState([]);
+  const [hasMap, setHasMap]   = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -19,14 +19,17 @@ export default function TherapistInterests() {
         });
         setPatients(data);
 
-        // Comprobar para cada paciente si tiene al menos un diario
-        const diaryChecks = await Promise.all(data.map(async p => {
-          const resp = await axios.get(`/api/emotions?patientId=${p._id}`, {
-            headers: { 'x-auth-token': token }
-          });
-          return [p._id, resp.data && resp.data.length > 0];
-        }));
-        setHasDiary(Object.fromEntries(diaryChecks));
+        // Comprobar si cada paciente tiene un PlanetMap guardado
+        const checks = await Promise.all(
+          data.map(async p => {
+            const resp = await axios.get(`/api/planet-map?patientId=${p._id}`, {
+              headers: { 'x-auth-token': token }
+            });
+            const exists = resp.data && resp.data.elements && resp.data.elements.length > 0;
+            return [p._id, exists];
+          })
+        );
+        setHasMap(Object.fromEntries(checks));
       } catch (err) {
         console.error(err);
       } finally {
@@ -38,40 +41,45 @@ export default function TherapistInterests() {
 
   if (loading) return <p>Cargando pacientes…</p>;
 
+  // Solo pacientes que completaron MiPlaneta
+  const filtered = patients.filter(p => hasMap[p._id]);
+
   return (
     <div className="therapist-patient-list">
-      <h1>Pacientes - Intereses Emocionales</h1>
-      <table className="patient-table">
-        <thead>
-          <tr>
-            <th>Nombre Completo</th>
-            <th>Fecha de Nacimiento</th>
-            <th>Email</th>
-            <th className="action-col">Estadísticas</th>
-          </tr>
-        </thead>
-        <tbody>
-          {patients.map(p => (
-            <tr key={p._id}>
-              <td>{p.nombre} {p.apellidos}</td>
-              <td>{new Date(p.fechaNacimiento).toLocaleDateString()}</td>
-              <td>{p.email}</td>
-              <td className="action-col">
-                <button
-                  className="detail-btn"
-                  disabled={!hasDiary[p._id]}
-                  onClick={() => navigate(`/therapist/interests/${p._id}`)}
-                  title={hasDiary[p._id]
-                    ? "Ver estadísticas de emociones"
-                    : "Diario de emociones pendiente"}
-                >
-                  <i className="fa fa-smile-o"></i>
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <h1>Pacientes – Intereses por Planet Map</h1>
+      {filtered.length === 0 
+        ? <p>No hay pacientes con Planet Map completado.</p>
+        : (
+          <table className="patient-table">
+            <thead>
+              <tr>
+                <th>Nombre Completo</th>
+                <th>Fecha de Nacimiento</th>
+                <th>Email</th>
+                <th className="action-col">Ver Estadísticas</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(p => (
+                <tr key={p._id}>
+                  <td>{p.nombre} {p.apellidos}</td>
+                  <td>{new Date(p.fechaNacimiento).toLocaleDateString()}</td>
+                  <td>{p.email}</td>
+                  <td className="action-col">
+                    <button
+                      className="detail-btn"
+                      onClick={() => navigate(`/therapist/interests/${p._id}`)}
+                      title="Ver estadísticas de Planet Map"
+                    >
+                      <i className="fa fa-globe"></i>
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )
+      }
     </div>
   );
 }

@@ -18,6 +18,16 @@
   font-weight: 600;
 }
 
+.info-icon {
+  margin-left: 8px;
+  color: #888;
+  cursor: pointer;
+}
+
+.info-icon:hover {
+  color: #444;
+}
+
 .routines-header h2 {
   margin: 0;
   font-size: 1.5rem;
