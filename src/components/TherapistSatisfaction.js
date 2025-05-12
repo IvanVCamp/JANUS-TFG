@@ -60,7 +60,7 @@ export default function TherapistSatisfaction() {
                 <button
                   className="detail-btn"
                   disabled={!hasDiary[p._id]}
-                  onClick={() => navigate(`/therapist/interests/${p._id}`)}
+                  onClick={() => navigate(`/therapist/satisfaction/${p._id}`)}
                   title={hasDiary[p._id]
                     ? "Ver estadísticas de emociones"
                     : "Diario de emociones pendiente"}
