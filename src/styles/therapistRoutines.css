@@ -99,3 +99,19 @@
   text-align: center;
 }
 
+/* Icono de lápiz en cada tarjeta */
+.routine-templates-page .tpl-card {
+  position: relative;
+}
+.routine-templates-page .icon-edit {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  color: var(--primary-color);
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: color 0.2s;
+}
+.routine-templates-page .icon-edit:hover {
+  color: #135ba1;
+}

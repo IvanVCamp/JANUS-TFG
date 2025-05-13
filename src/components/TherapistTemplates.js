@@ -1,6 +1,7 @@
 // src/pages/RoutineTemplatesPage.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaTrash, FaEdit } from 'react-icons/fa';  // ← Import FaEdit
 import '../styles/routineTemplates.css';
 
 export default function RoutineTemplatesPage() {
@@ -15,6 +16,7 @@ export default function RoutineTemplatesPage() {
   useEffect(() => {
     if (!token) {
       navigate('/login');
+      setLoading(false);
       return;
     }
 
@@ -24,11 +26,12 @@ export default function RoutineTemplatesPage() {
     };
 
     Promise.all([
-      fetch('/api/routines/templates', { headers }),
+      fetch('/api/routines/templates', { headers }),       // ← URL corregida
       fetch('/api/therapist/patients', { headers })
     ])
       .then(async ([resTpl, resPat]) => {
         if (resTpl.status === 401 || resPat.status === 401) {
+          setLoading(false);
           alert('Sesión expirada. Vuelve a iniciar sesión.');
           navigate('/login');
           return;
@@ -67,21 +70,47 @@ export default function RoutineTemplatesPage() {
     // Eliminar plantilla
     if (zone === 'trash' && type === 'template') {
       setTemplates(ts => ts.filter(t => t._id !== item._id));
-      fetch(`/api/routinetemplates/${item._id}`, { method: 'DELETE', headers })
+      fetch(`/api/routines/templates/${item._id}`, { method: 'DELETE', headers })  // ← URL corregida
         .catch(console.error);
     }
     // Duplicar plantilla
     else if (zone === 'duplicate' && type === 'template') {
-      const copy = { ...item, name: item.name + ' (copia)' };
-      fetch('/api/routinetemplates', {
+      const payload = {
+        name: item.name + ' (copia)',
+        description: item.description,
+        category: item.category,
+        tags: item.tags,
+        duration: item.duration,
+        reminder: item.reminder,
+        activities: item.activities.map(a => ({
+          name: a.name,
+          desc: a.desc,
+          challenge: a.challenge,
+          minutes: a.minutes
+        }))
+      };
+      fetch('/api/routines/templates', {
         method: 'POST',
         headers,
-        body: JSON.stringify(copy)
+        body: JSON.stringify(payload)
       })
-        .then(res => res.json())
-        .then(newTpl => setTemplates(ts => [newTpl, ...ts]))
-        .catch(console.error);
+        .then(res => {
+          if (!res.ok) {
+            // Leer texto del error y lanzarlo para el catch
+            return res.text().then(text => { throw new Error(text) });
+          }
+          return res.json();
+        })
+        .then(newTpl => {
+          setTemplates(ts => [newTpl, ...ts]);
+        })
+        .catch(err => {
+          console.error('Error duplicando plantilla:', err);
+          alert('No se pudo duplicar: ' + err.message);
+        });
+      return;
     }
+
     // Asignar a paciente
     else if (zone.startsWith('assign-') && type === 'template') {
       const patientId = zone.split('-')[1];
@@ -141,11 +170,15 @@ export default function RoutineTemplatesPage() {
                 draggable
                 onDragStart={e => onDragStart(e, t, 'template')}
               >
+                {/* ✏️ Icono de edición */}
+                <FaEdit
+                  className="icon-edit"
+                  onClick={() => navigate(`/therapist/templates/${t._id}/edit`)}
+                />
+
                 <h2>{t.name}</h2>
                 <p className="tpl-desc">{t.description}</p>
-                <div className="tpl-meta">
-                  {t.activities.length} actividades
-                </div>
+                <div className="tpl-meta">{t.activities.length} actividades</div>
               </div>
             ))}
           </div>
