@@ -18,6 +18,10 @@ import TherapistSatisfaction from './components/TherapistSatisfaction';
 import PatientSatisfaction from './components/PatientSatisfaction';
 import TherapistInterests from './components/TherapistInterests';
 import PatientInterests from './components/PatientInterests';
+import TherapistTemplates from './components/TherapistTemplates';
+import TemplateForm from './components/TemplateForm';
+import AssignTemplate from './components/AssignTemplate';
+import PatientAssignedRoutines from './components/PatientAssignedRoutines';
 
 function App() {
   return (
@@ -41,6 +45,9 @@ function App() {
         <Route path="/therapist/satisfaction/:patientId" element={<PatientSatisfaction />} />
         <Route path="/therapist/interests" element={<TherapistInterests />} />
         <Route path="/therapist/interests/:patientId" element={<PatientInterests />} />
+        <Route path="/therapist/templates"                      element={<TherapistTemplates />} />
+        <Route path="/therapist/templates/new"                  element={<TemplateForm />} />
+        <Route path="/therapist/templates/:templateId/assign"   element={<AssignTemplate />} />
         </Routes>
     </Router>
   );

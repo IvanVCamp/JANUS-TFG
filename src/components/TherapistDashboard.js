@@ -80,6 +80,9 @@ function TherapistDashboard() {
                 <i className="fa fa-envelope icon" aria-hidden="true"></i>
                 Generar Invitación
               </button>
+              <button className="option-btn" onClick={() => navigate('/therapist/templates')}>
+                <i className="fa fa-file-text icon"></i> Plantillas
+              </button>
             </div>
             <div className="button-group">
               <h3>INFORMACIÓN ESTADÍSTICA</h3>

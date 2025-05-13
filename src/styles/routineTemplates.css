@@ -1,0 +1,359 @@
+/* routineTemplates.css */
+
+/* Variables de tema (global) */
+:root {
+  --primary-color: #1976d2;
+  --secondary-color: #388e3c;
+  --light-bg: #f4f7fa;
+  --card-bg: #ffffff;
+  --text-color: #333333;
+  --border-radius: 8px;
+  --shadow-light: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+/* Scoped Styles para la página de plantillas */
+.routine-templates-page {
+  position: relative;
+  width: 100%;
+  min-height: 100vh; /* Asegura cubrir toda la altura del viewport */
+  overflow-x: hidden; /* Oculta cualquier desbordamiento horizontal */
+  font-family: 'Poppins', sans-serif;
+  background: var(--light-bg);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+}
+
+/* Contenedor principal */
+.routine-templates-page .tpl-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem; /* Añade padding superior e inferior para cubrir espacios */
+}
+
+/* Header con botón de nueva plantilla */
+.routine-templates-page .tpl-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.routine-templates-page .tpl-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.routine-templates-page .btn-new,
+.routine-templates-page .btn-view-templates {
+  background: var(--primary-color);
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s;
+}
+
+.routine-templates-page .btn-new:hover,
+.routine-templates-page .btn-view-templates:hover {
+  background: #135ba1;
+  transform: translateY(-2px);
+}
+
+/* Grid de tarjetas de plantilla */
+.routine-templates-page .tpl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.routine-templates-page .tpl-card {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-light);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.routine-templates-page .tpl-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.routine-templates-page .tpl-card h2 {
+  margin: 0 0 0.5rem;
+  color: var(--primary-color);
+  font-size: 1.25rem;
+}
+
+.routine-templates-page .tpl-desc {
+  flex: 1;
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #555;
+}
+
+.routine-templates-page .tpl-meta {
+  font-size: 0.85rem;
+  color: #777;
+}
+
+/* Indicador de nivel de reto */
+.routine-templates-page .challenge-indicator {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.routine-templates-page .challenge-indicator::before {
+  content: '';
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  background: green;
+}
+
+.routine-templates-page .challenge-indicator[data-level='Medio']::before {
+  background: #fbc02d;
+}
+
+.routine-templates-page .challenge-indicator[data-level='Alto']::before {
+  background: #e53935;
+}
+
+.routine-templates-page .btn-assign {
+  margin-top: 1rem;
+  background: var(--secondary-color);
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.routine-templates-page .btn-assign:hover {
+  background: #2e7d32;
+}
+
+/* Formularios de creación y asignación */
+.routine-templates-page .tpl-form,
+.routine-templates-page .assign-form {
+  max-width: 600px;
+  margin: 2rem auto;
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.routine-templates-page .tpl-form h2,
+.routine-templates-page .assign-form h2 {
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+  font-size: 1.5rem;
+}
+
+.routine-templates-page .tpl-form label,
+.routine-templates-page .assign-form label {
+  display: block;
+  margin: 1rem 0 0.5rem;
+  font-weight: 500;
+}
+
+.routine-templates-page .tpl-form input,
+.routine-templates-page .tpl-form textarea,
+.routine-templates-page .tpl-form select,
+.routine-templates-page .assign-form select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius);
+  margin-top: 0.3rem;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.routine-templates-page .tpl-form input:focus,
+.routine-templates-page .tpl-form textarea:focus,
+.routine-templates-page .tpl-form select:focus,
+.routine-templates-page .assign-form select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.routine-templates-page .btn-save {
+  display: block;
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  padding: 0.8rem 1.6rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  transition: background 0.3s;
+}
+
+.routine-templates-page .btn-save:hover {
+  background: #135ba1;
+}
+
+/* Estilos responsive */
+@media (max-width: 768px) {
+  .routine-templates-page .tpl-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.routine-templates-page .empty-state {
+  background: #fff;
+}
+
+.routine-templates-page .dropzones {
+  gap: 1rem;
+}
+
+.routine-templates-page .dropzone {
+  flex: 1;
+  padding: 1.5rem;
+  border: 2px dashed #aaa;
+  border-radius: var(--border-radius);
+  text-align: center;
+  font-weight: 600;
+  color: #555;
+  transition: background 0.2s, border-color 0.2s;
+}
+.routine-templates-page .dropzone.trash:hover {
+  background: #fdecea;
+  border-color: #f44336;
+  color: #c00;
+}
+.routine-templates-page .dropzone.duplicate:hover {
+  background: #e8f5e9;
+  border-color: #4caf50;
+  color: #2e7d32;
+}
+
+.routine-templates-page .patient-card {
+  background: var(--card-bg);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.routine-templates-page .patient-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+.routine-templates-page .tag-input-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+.routine-templates-page .tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.routine-templates-page .tag-pill {
+  background: var(--secondary-color);
+  color: #fff;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+}
+.routine-templates-page .activities-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.routine-templates-page .activity-item {
+  background: var(--card-bg);
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.routine-templates-page .small-input,
+.routine-templates-page .small-select {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius);
+  flex: 1;
+}
+.routine-templates-page .drag-handle {
+  cursor: grab;
+  color: #888;
+}
+.routine-templates-page .remove-ico {
+  color: #e53935;
+  cursor: pointer;
+}
+
+.tpl-form.landscape .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.activities-list.horizontal-scroll {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+}
+
+.activity-item.landscape {
+  min-width: 280px;
+  flex-shrink: 0;
+}
+
+@media(max-width:1024px) {
+  .tpl-form.landscape .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .activities-list.horizontal-scroll {
+    flex-direction: column;
+    overflow-x: visible;
+  }
+}

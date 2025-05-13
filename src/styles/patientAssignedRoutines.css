@@ -1,0 +1,41 @@
+.pr-container {
+  padding:20px;
+  font-family:'Poppins',sans-serif;
+}
+.pr-card {
+  background:#fff;
+  border-left:4px solid #4caf50;
+  margin-bottom:15px;
+  padding:15px;
+  border-radius:4px;
+  box-shadow:0 2px 4px rgba(0,0,0,0.1);
+}
+.pr-card h3 { margin:0 0 5px; }
+.pr-info {
+  display:flex;
+  justify-content:space-between;
+  color:#666;
+  font-size:0.9rem;
+}
+.pr-actions {
+  margin-top:10px;
+  display:flex;
+  gap:10px;
+}
+.pr-actions button {
+  flex:1;
+  padding:8px;
+  border:none;
+  border-radius:4px;
+  cursor:pointer;
+  font-weight:600;
+}
+.pr-actions button:first-of-type {
+  background:#4caf50;
+  color:#fff;
+}
+.pr-actions button:last-of-type {
+  background:#f39c12;
+  color:#fff;
+}
+.pr-actions button:hover { opacity:0.9; }

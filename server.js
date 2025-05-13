@@ -5,7 +5,6 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const connectDB = require('./backend/config/db');
-
 const app = express();
 
 // 1) Conectar a la base de datos
@@ -35,8 +34,8 @@ app.use('/api/emotions', require('./backend/routes/emotions.routes'));
 app.use('/api/planet-map', require('./backend/routes/planetMap.routes'));
 app.use('/api/invitations', require('./backend/routes/invitations.routes'));
 app.use('/api/therapist', require('./backend/routes/therapist.routes'));
-
-// 6) Catch‑all: cualquier GET no servido por lo anterior devuelve index.html
+app.use('/api/routines/instances', require('./backend/routes/routineInstances.routes'));
+app.use('/api/routines/templates', require('./backend/routes/routineTemplate.routes'));
 app.get('*', (req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
