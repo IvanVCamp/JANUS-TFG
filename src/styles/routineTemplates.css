@@ -357,3 +357,24 @@
     overflow-x: visible;
   }
 }
+
+.patient-templates-page .tpl-activities-list {
+  list-style: none;
+  padding: 0;
+}
+.patient-templates-page .tpl-activities-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+.patient-templates-page .activity-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+.patient-templates-page .done {
+  text-decoration: line-through;
+  color: #888;
+}

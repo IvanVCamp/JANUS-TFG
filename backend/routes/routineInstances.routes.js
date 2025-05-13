@@ -9,4 +9,6 @@ router.post('/',             auth, c.assignToPatient);
 // Obtener rutinas asignadas a un paciente
 router.get('/:patientId',    auth, c.getByPatient);
 
+router.post('/:instanceId/activities/:activityIdx', auth,c.markActivity);
+
 module.exports = router;

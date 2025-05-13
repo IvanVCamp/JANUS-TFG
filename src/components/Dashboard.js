@@ -63,9 +63,9 @@ function Home() {
               Mi Planeta
             </button>
 
-            <button className="option-btn disabled-btn">
-              <i className="fa fa-rocket icon" aria-hidden="true"></i>
-              Misión: Yo puedo
+            <button className="option-btn" onClick={() => navigate('/patient/templates')}>
+            <i className="fa fa-folder-open icon" aria-hidden="true"></i>
+              Mis Plantillas
             </button>
 
             <button className="option-btn" onClick={() => navigate('/diario-de-emociones')}>
