@@ -19,6 +19,7 @@ function Login() {
     try {
       const response = await authService.login(formData);
       localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
       // Redireccionar según el rol devuelto:
       if(response.data.role === 'terapeuta') {
         navigate('/therapist');

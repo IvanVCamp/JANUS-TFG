@@ -378,3 +378,74 @@
   text-decoration: line-through;
   color: #888;
 }
+
+/* Scoped styles para página de paciente */
+.patient-templates-page .progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0.5rem 0;
+}
+.patient-templates-page .progress-bar .progress {
+  height: 100%;
+  background: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+/* Ajuste de icono expandir/colapsar */
+.patient-templates-page .icon-edit {
+  color: var(--primary-color);
+  font-size: 1.2rem;
+}
+.patient-templates-page .icon-edit:hover {
+  color: #135ba1;
+}
+
+/* Evitar que el scroll horizontal de actividades influya aquí */
+.patient-templates-page .horizontal-scroll {
+  overflow: visible;
+}
+
+/* ─── Barra de progreso ───────────────────────────────────────────── */
+.patient-assigns .progress-bar {
+  background: #eee;
+  border-radius: 4px;
+  height: 8px;
+  overflow: hidden;
+  margin: 0.5rem 0;
+}
+.patient-assigns .progress-fill {
+  background: #388e3c;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+/* ─── Línea de actividad ─────────────────────────────────────────── */
+.patient-assigns .activity-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem;
+  border-bottom: 1px solid #ddd;
+}
+.patient-assigns .activity-line.completed span {
+  text-decoration: line-through;
+  color: #999;
+}
+
+/* ─── Botón icono expand ────────────────────────────────────────── */
+.btn-icon {
+  color: var(--primary-color);
+}
+
+/* ─── Adaptaciones responsive ───────────────────────────────────── */
+@media (max-width: 600px) {
+  .patient-assigns {
+    padding: 1rem;
+  }
+  .assign-card {
+    padding: 1rem;
+  }
+}

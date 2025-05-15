@@ -76,7 +76,11 @@ exports.register = async (req, res) => {
 
     // Generar y devolver token con rol
     const token = generateToken(user.id, user.role.toLowerCase());
-    res.status(201).json({ token, role: user.role });
+    res.json({
+      token,
+      role: user.role.toLowerCase(),
+      user: { id: user.id, nombre: user.nombre, email: user.email }
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Error en el servidor');

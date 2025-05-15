@@ -1,0 +1,43 @@
+.patient-routines-page .pr-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+.patient-routines-page h1 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+.patient-routines-page .routine-card {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+}
+.patient-routines-page .rt-desc {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 1rem;
+}
+.patient-routines-page .activities-list label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+}
+.patient-routines-page .activities-list label.completed span {
+  text-decoration: line-through;
+  color: #777;
+}
+.patient-routines-page .activities-list input {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+.patient-routines-page .empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--primary-color);
+  border: 2px dashed var(--primary-color);
+  border-radius: var(--border-radius);
+}
