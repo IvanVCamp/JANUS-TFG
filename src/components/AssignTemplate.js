@@ -16,7 +16,7 @@ export default function AssignTemplate() {
     const token = localStorage.getItem('token');
     axios.get(`/api/routines/templates/${templateId}`, { headers: {'x-auth-token':token} })
       .then(r=> setTpl(r.data));
-    axios.get('/api/therapist/patients', { headers: {'x-auth-token':token} })
+    axios.get(`/api/therapist/patients`, { headers: {'x-auth-token':token} })
       .then(r=> setPatients(r.data));
   }, [templateId]);
 

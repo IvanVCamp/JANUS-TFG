@@ -449,3 +449,270 @@
     padding: 1rem;
   }
 }
+
+.patient-templates-page .tpl-container {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+}
+
+/* Ajustes específicos para la lista de actividades */
+.patient-templates-page .tpl-activities-list {
+  list-style: none;
+  margin: 1rem 0;
+  padding: 0;
+}
+
+.patient-templates-page .activity-item {
+  transition: background 0.2s;
+}
+
+.patient-templates-page .activity-item:hover {
+  background: #fafafa;
+}
+
+/* Styling de campos inline */
+.patient-templates-page .form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Errores y mensajes */
+.patient-templates-page .error-msg {
+  color: #e53935;
+  text-align: center;
+  margin: 1rem 0;
+}
+/* Asegúrate de que .tpl-card sea relativo */
+.patient-templates-page .tpl-card {
+  position: relative;
+}
+
+/* Estilos para el enlace de detalle (lupa) */
+.patient-templates-page .tpl-detail-link {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.2rem;
+  color: var(--primary-color);
+  transition: color 0.2s;
+}
+
+.patient-templates-page .tpl-detail-link:hover {
+  color: var(--primary-dark);
+}
+
+/* Añade al final de src/components/patientTemplates.css */
+
+/* Página de detalle */
+.tpl-detail-page .tpl-container {
+  max-width: 700px;
+  margin: 2rem auto;
+}
+
+/* Encabezado con botón de volver */
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.back-link {
+  text-decoration: none;
+  font-size: 1.2rem;
+  color: var(--primary-color);
+  transition: color 0.2s;
+}
+.back-link:hover {
+  color: var(--primary-dark);
+}
+
+/* Metadatos en bloque */
+.tpl-detail-page .tpl-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+/* Título de actividades */
+.activities-title {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 0.5rem;
+}
+
+/* Añade estas reglas al final de src/components/patientTemplates.css */
+
+/* Contenedor más ancho en detalle */
+.detail-container {
+  max-width: 800px;
+  margin: 2rem auto;
+}
+
+/* Progreso */
+.progress-bar {
+  width: 100%;
+  height: 1rem;
+  background: var(--border-light);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+.progress-filled {
+  height: 100%;
+  background: var(--primary-color);
+  transition: width 0.4s ease;
+}
+.progress-text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0.5rem 0 1rem;
+  text-align: right;
+}
+
+/* Tags badges */
+.tags-container {
+  margin-bottom: 1rem;
+}
+.tag-badge {
+  display: inline-block;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  margin-right: 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* Indicador reto nivel */
+.challenge-indicator.level-1 { background: #c8e6c9; }
+.challenge-indicator.level-2 { background: #fff9c4; }
+.challenge-indicator.level-3 { background: #ffe0b2; }
+.challenge-indicator.level-4 { background: #ffccbc; }
+.challenge-indicator.level-5 { background: #ffcdd2; }
+.challenge-indicator {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+}
+
+/* Metadatos detalle */
+.detail-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+.detail-meta i {
+  margin-right: 0.25rem;
+}
+
+/* Secciones */
+.tpl-section {
+  margin-bottom: 2rem;
+}
+.section-title {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 0.25rem;
+}
+.section-content {
+  line-height: 1.6;
+}
+
+/* Actividades detalladas */
+.activities-detailed-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.activity-detail-item {
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: box-shadow 0.2s;
+}
+.activity-detail-item:hover {
+  box-shadow: var(--shadow-light);
+}
+.activity-detail-item.completed {
+  background: #f0f8f0;
+}
+
+/* Cabecera de actividad */
+.activity-main {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+.drag-handle {
+  cursor: grab;
+  color: var(--text-muted);
+}
+.checkbox-label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.activity-name {
+  font-weight: 500;
+}
+.activity-info-icons span {
+  margin-left: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.activity-desc {
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+  color: var(--text-secondary);
+}
+
+/* Notas */
+.activity-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.activity-notes textarea {
+  width: 100%;
+  min-height: 4rem;
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius);
+  padding: 0.5rem;
+  resize: vertical;
+}
+.btn-note {
+  align-self: flex-end;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  background: var(--primary-color);
+  color: #fff;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: background 0.2s;
+}
+.btn-note:hover {
+  background: var(--primary-dark);
+}

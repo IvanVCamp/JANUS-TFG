@@ -1,7 +1,7 @@
 // src/pages/RoutineTemplatesPage.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaTrash, FaEdit } from 'react-icons/fa';  // ← Import FaEdit
+import { FaTrash, FaEdit } from 'react-icons/fa';
 import '../styles/routineTemplates.css';
 
 export default function RoutineTemplatesPage() {
@@ -26,7 +26,7 @@ export default function RoutineTemplatesPage() {
     };
 
     Promise.all([
-      fetch('/api/routines/templates', { headers }),       // ← URL corregida
+      fetch('/api/routines/templates', { headers }),
       fetch('/api/therapist/patients', { headers })
     ])
       .then(async ([resTpl, resPat]) => {
@@ -70,7 +70,7 @@ export default function RoutineTemplatesPage() {
     // Eliminar plantilla
     if (zone === 'trash' && type === 'template') {
       setTemplates(ts => ts.filter(t => t._id !== item._id));
-      fetch(`/api/routines/templates/${item._id}`, { method: 'DELETE', headers })  // ← URL corregida
+      fetch(`/api/routines/templates/${item._id}`, { method: 'DELETE', headers })
         .catch(console.error);
     }
     // Duplicar plantilla
@@ -96,7 +96,6 @@ export default function RoutineTemplatesPage() {
       })
         .then(res => {
           if (!res.ok) {
-            // Leer texto del error y lanzarlo para el catch
             return res.text().then(text => { throw new Error(text) });
           }
           return res.json();
@@ -108,19 +107,23 @@ export default function RoutineTemplatesPage() {
           console.error('Error duplicando plantilla:', err);
           alert('No se pudo duplicar: ' + err.message);
         });
-      return;
     }
-
-    // Asignar a paciente
+    // Asignar a paciente (ruta corregida)
     else if (zone.startsWith('assign-') && type === 'template') {
       const patientId = zone.split('-')[1];
-      fetch(`/api/patients/${patientId}/assignTemplate`, {
+      fetch('/api/routines/instances', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ templateId: item._id })
+        body: JSON.stringify({ templateId: item._id, patientId })
       })
-        .then(() => alert(`Plantilla «${item.name}» asignada a paciente ${patientId}`))
-        .catch(console.error);
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          alert(`Plantilla «${item.name}» asignada a paciente ${patientId}`);
+        })
+        .catch(err => {
+          console.error('Error asignando plantilla:', err);
+          alert('No se pudo asignar: ' + err.message);
+        });
     }
   }, [token]);
 
@@ -170,12 +173,10 @@ export default function RoutineTemplatesPage() {
                 draggable
                 onDragStart={e => onDragStart(e, t, 'template')}
               >
-                {/* ✏️ Icono de edición */}
                 <FaEdit
                   className="icon-edit"
                   onClick={() => navigate(`/therapist/templates/${t._id}/edit`)}
                 />
-
                 <h2>{t.name}</h2>
                 <p className="tpl-desc">{t.description}</p>
                 <div className="tpl-meta">{t.activities.length} actividades</div>

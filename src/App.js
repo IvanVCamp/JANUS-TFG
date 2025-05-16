@@ -23,7 +23,7 @@ import TemplateForm from './components/TemplateForm';
 import AssignTemplate from './components/AssignTemplate';
 import EditRoutineTemplatePage from './components/EditRoutineTemplatePage';
 import PatientTemplatesPage      from './components/PatientTemplatesPage';
-
+import PatientTemplateDetail from './components/PatientTemplateDetail';
 function App() {
   return (
     <Router>
@@ -51,6 +51,7 @@ function App() {
         <Route path="/therapist/templates/:templateId/assign"   element={<AssignTemplate />} />
         <Route path="/therapist/templates/:id/edit" element={<EditRoutineTemplatePage />} />
         <Route path="/patient/templates" element={<PatientTemplatesPage />} />
+        <Route path="/patient/templates/:instanceId" element={<PatientTemplateDetail />} />
         </Routes>
     </Router>
   );

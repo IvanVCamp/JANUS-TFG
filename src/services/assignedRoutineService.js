@@ -1,25 +1,27 @@
+// src/services/assignedRoutineService.js
 import axios from 'axios';
-const API = '/api/assigned-routines';
 
-export default {
-  assign: (data, token) =>
-    axios.post(API, data, { headers: { 'x-auth-token': token } }),
+const API = '/api/routines/instances';
 
-  getList: (paramsOrToken, maybeToken) => {
-    if (maybeToken) {
-      // llamada con params y token
-      return axios.get(API, {
-        params: paramsOrToken,
-        headers: { 'x-auth-token': maybeToken }
-      });
-    } else {
-      // llamada solo con token
-      return axios.get(API, {
-        headers: { 'x-auth-token': paramsOrToken }
-      });
-    }
-  },
+const assignedRoutineService = {
+  /**
+   * Obtiene todas las plantillas asignadas al paciente.
+   * @param {string} patientId – ID del paciente
+   */
+  getAssignedTemplates: (patientId) =>
+    axios.get(`${API}/${patientId}`),
 
-  update: (id, data, token) =>
-    axios.put(`${API}/${id}`, data, { headers: { 'x-auth-token': token } })
+  /**
+   * Marca o desmarca una actividad en una instancia de rutina.
+   * @param {string} instanceId – ID de la instancia
+   * @param {number} activityIdx – índice de la actividad
+   * @param {boolean} completed – true para marcar, false para desmarcar
+   */
+  toggleActivity: (instanceId, activityIdx, completed) =>
+    axios.post(
+      `${API}/${instanceId}/activities/${activityIdx}`,
+      { completed }
+    )
 };
+
+export default assignedRoutineService;
