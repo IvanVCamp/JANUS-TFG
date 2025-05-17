@@ -24,6 +24,7 @@ import AssignTemplate from './components/AssignTemplate';
 import EditRoutineTemplatePage from './components/EditRoutineTemplatePage';
 import PatientTemplatesPage      from './components/PatientTemplatesPage';
 import PatientTemplateDetail from './components/PatientTemplateDetail';
+import TherapistPatientTemplatesDetail from './components/TherapistTemplatesDetail';
 function App() {
   return (
     <Router>
@@ -52,6 +53,7 @@ function App() {
         <Route path="/therapist/templates/:id/edit" element={<EditRoutineTemplatePage />} />
         <Route path="/patient/templates" element={<PatientTemplatesPage />} />
         <Route path="/patient/templates/:instanceId" element={<PatientTemplateDetail />} />
+        <Route path="/therapist/templates/:patientId"element={<TherapistPatientTemplatesDetail />}/>
         </Routes>
     </Router>
   );

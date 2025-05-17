@@ -1,7 +1,8 @@
 // src/pages/RoutineTemplatesPage.js
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaTrash, FaEdit } from 'react-icons/fa';
+import { FaTrash, FaEdit, FaEye } from 'react-icons/fa';
 import '../styles/routineTemplates.css';
 
 export default function RoutineTemplatesPage() {
@@ -27,7 +28,7 @@ export default function RoutineTemplatesPage() {
 
     Promise.all([
       fetch('/api/routines/templates', { headers }),
-      fetch('/api/therapist/patients', { headers })
+      fetch('/api/therapist/patients',   { headers })
     ])
       .then(async ([resTpl, resPat]) => {
         if (resTpl.status === 401 || resPat.status === 401) {
@@ -53,14 +54,19 @@ export default function RoutineTemplatesPage() {
 
   // Drag start: guardamos tipo y payload
   const onDragStart = (e, item, type) => {
-    e.dataTransfer.setData('application/json', JSON.stringify({ type, item }));
+    e.dataTransfer.setData(
+      'application/json',
+      JSON.stringify({ type, item })
+    );
     e.dataTransfer.effectAllowed = 'copyMove';
   };
 
   // Drop genérico (basado en zona)
   const handleDrop = useCallback((e, zone) => {
     e.preventDefault();
-    const { type, item } = JSON.parse(e.dataTransfer.getData('application/json'));
+    const { type, item } = JSON.parse(
+      e.dataTransfer.getData('application/json')
+    );
 
     const headers = {
       'Content-Type': 'application/json',
@@ -70,8 +76,10 @@ export default function RoutineTemplatesPage() {
     // Eliminar plantilla
     if (zone === 'trash' && type === 'template') {
       setTemplates(ts => ts.filter(t => t._id !== item._id));
-      fetch(`/api/routines/templates/${item._id}`, { method: 'DELETE', headers })
-        .catch(console.error);
+      fetch(`/api/routines/templates/${item._1}`, {
+        method: 'DELETE',
+        headers
+      }).catch(console.error);
     }
     // Duplicar plantilla
     else if (zone === 'duplicate' && type === 'template') {
@@ -96,7 +104,7 @@ export default function RoutineTemplatesPage() {
       })
         .then(res => {
           if (!res.ok) {
-            return res.text().then(text => { throw new Error(text) });
+            return res.text().then(txt => { throw new Error(txt); });
           }
           return res.json();
         })
@@ -108,7 +116,7 @@ export default function RoutineTemplatesPage() {
           alert('No se pudo duplicar: ' + err.message);
         });
     }
-    // Asignar a paciente (ruta corregida)
+    // Asignar a paciente
     else if (zone.startsWith('assign-') && type === 'template') {
       const patientId = zone.split('-')[1];
       fetch('/api/routines/instances', {
@@ -118,7 +126,7 @@ export default function RoutineTemplatesPage() {
       })
         .then(res => {
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          alert(`Plantilla «${item.name}» asignada a paciente ${patientId}`);
+          alert(`«${item.name}» asignada a ${patientId}`);
         })
         .catch(err => {
           console.error('Error asignando plantilla:', err);
@@ -175,11 +183,22 @@ export default function RoutineTemplatesPage() {
               >
                 <FaEdit
                   className="icon-edit"
-                  onClick={() => navigate(`/therapist/templates/${t._id}/edit`)}
+                  onClick={() =>
+                    navigate(`/therapist/templates/${t._id}/edit`)
+                  }
                 />
                 <h2>{t.name}</h2>
                 <p className="tpl-desc">{t.description}</p>
-                <div className="tpl-meta">{t.activities.length} actividades</div>
+                <div className="tpl-meta">
+                  {t.activities.length} actividades
+                  <span
+                    className="detail-link"
+                    onClick={() => navigate(`/therapist/templates/${t._id}`)}
+                    title="Ver detalle de plantilla"
+                  >
+                    <FaEye />
+                  </span>
+                </div>
               </div>
             ))}
           </div>
@@ -195,36 +214,41 @@ export default function RoutineTemplatesPage() {
             onDragOver={allowDrop}
             onDrop={e => handleDrop(e, 'trash')}
           >
-            🗑️ Arrastra aquí para eliminar
+            🗑️ Eliminar plantilla
           </div>
           <div
             className="dropzone duplicate"
             onDragOver={allowDrop}
             onDrop={e => handleDrop(e, 'duplicate')}
           >
-            📋 Arrastra aquí Ctrl+drag para duplicar
+            📋 Duplicar plantilla
           </div>
         </div>
 
-        {/* Lista de pacientes para asignar */}
+        {/* Lista de pacientes para asignar o ver detalle */}
         <h3 style={{ marginTop: '2rem' }}>Pacientes</h3>
         <div className="tpl-grid">
           {patients.map(p => (
             <div
               key={p._id}
               className="patient-card"
+              style={{ cursor: 'pointer' }}
+              onClick={() => navigate(`/therapist/templates/${p._id}`)}
               onDragOver={allowDrop}
               onDrop={e => handleDrop(e, `assign-${p._id}`)}
             >
               <img
                 src={p.avatar}
-                alt={p.name}
-                style={{ width: 40, borderRadius: '50%' }}
+                alt={`${p.nombre} avatar`}
+                className="patient-avatar"
               />
-              <div style={{ marginLeft: '0.5rem' }}>{p.name}</div>
-              <div style={{ fontSize: '0.8rem', color: '#666' }}>
-                {p.email}
+              <div className="patient-info">
+                <strong>
+                  {p.nombre} {p.apellidos}
+                </strong>
+                <small>{p.email}</small>
               </div>
+              <FaEye className="icon-eye" title="Ver detalle de paciente" />
             </div>
           ))}
         </div>

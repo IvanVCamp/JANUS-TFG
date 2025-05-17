@@ -1,0 +1,134 @@
+/* Base ya viene de routineTemplates.css :contentReference[oaicite:6]{index=6}:contentReference[oaicite:7]{index=7} */
+
+/* Contenedor detalle */
+.detail-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+}
+
+/* Back-link */
+.back-link {
+  text-decoration: none;
+  color: var(--primary-color);
+  font-size: 1rem;
+  margin-right: 1rem;
+}
+.back-link:hover { color: var(--primary-dark); }
+
+/* Encabezados */
+.detail-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.detail-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+/* Info paciente */
+.patient-info {
+  display: flex;
+  gap: 2rem;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+  color: #555;
+}
+
+/* Tarjeta de detalle */
+.detail-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+/* Barra de progreso pequeña */
+.progress-bar.small {
+  height: 0.75rem;
+}
+.progress-text {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0.5rem 0 1rem;
+  text-align: right;
+}
+
+/* Badges y reto */
+.tag-badge {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+  margin-right: 0.5rem;
+  font-size: 0.8rem;
+}
+.challenge-indicator {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.3rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+/* Metadatos */
+.detail-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+.detail-meta i {
+  margin-right: 0.3rem;
+}
+
+/* Actividades */
+.activities-detailed-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.activity-detail-item {
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: box-shadow 0.2s;
+}
+.activity-detail-item:hover {
+  box-shadow: var(--shadow-light);
+}
+.activity-detail-item.completed {
+  background: #f0f8f0;
+}
+
+/* Cabecera actividad */
+.activity-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.activity-info-icons span {
+  font-size: 0.85rem;
+  color: #777;
+  margin-left: 1rem;
+}
+.activity-desc {
+  margin: 0.5rem 0;
+  color: #444;
+}
+
+/* Notas read-only */
+.activity-notes-readonly {
+  background: #fafafa;
+  border-left: 4px solid var(--primary-light);
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  color: #333;
+  border-radius: 0 4px 4px 0;
+}

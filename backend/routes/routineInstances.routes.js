@@ -8,7 +8,7 @@ const c = require('../controllers/routineInstances.controller');
 router.post('/',             auth, c.assignToPatient);
 // Obtener rutinas asignadas a un paciente
 router.get('/:patientId',    auth, c.getByPatient);
-
++router.get('/template/:templateId',   auth, c.getByTemplate);
 router.post('/:instanceId/activities/:activityIdx', auth,c.markActivity);
 
 module.exports = router;

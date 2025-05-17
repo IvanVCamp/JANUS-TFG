@@ -65,3 +65,15 @@ exports.getByPatient = async (req, res) => {
     res.status(500).json({ msg: 'Error obteniendo asignaciones' });
   }
 };
+
+exports.getByTemplate = async (req, res) => {
+  try {
+    const insts = await RoutineInstance
+      .find({ template: req.params.templateId })
+      .populate('patient');
+    res.json(insts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Error obteniendo instancias por plantilla' });
+  }
+};
