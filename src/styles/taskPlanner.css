@@ -335,3 +335,33 @@
   .day-view-header button:hover {
     background-color: #574bd1;
   }
+
+  .manage-btn {
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-left: 8px;
+  cursor: pointer;
+}
+.manage-content {
+  width: 500px;
+}
+.manage-list {
+  list-style: none;
+  padding: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.manage-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.manage-actions button {
+  margin-left: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+}

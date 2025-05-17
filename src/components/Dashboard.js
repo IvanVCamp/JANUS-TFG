@@ -1,92 +1,345 @@
-import React, { useState } from 'react';
+// src/components/Dashboard.js
+
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Calendar from 'react-calendar';
+import axios from 'axios';
 import 'react-calendar/dist/Calendar.css';
 import '../styles/home.css';
+import '../styles/taskPlanner.css';
 
-function Home() {
-  const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState(new Date());
+// helper para extraer userId del JWT
+function decodeJwt(token) {
+  try {
+    const b64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    return JSON.parse(atob(b64));
+  } catch {
+    return null;
+  }
+}
+function getUserId() {
+  const raw = localStorage.getItem('token');
+  if (!raw) return null;
+  const token  = raw.startsWith('Bearer ') ? raw.slice(7) : raw;
+  const payload = decodeJwt(token);
+  return payload?.id || payload?.sub || payload?.user?.id || null;
+}
 
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
+export default function Home() {
+  const navigate             = useNavigate();
+  const [selectedDate, setSelectedDate]     = useState(new Date());
+  const [showPanel,    setShowPanel]        = useState(false);
+  const [showModal,    setShowModal]        = useState(false);
+  const [showManage,   setShowManage]       = useState(false);
+  const [tasks,        setTasks]            = useState([]);    // todos los reminders
+  const [upcoming,     setUpcoming]         = useState([]);    // futuros
+  const [expiredReminders, setExpiredReminders] = useState([]);
+  const [countdowns,   setCountdowns]       = useState({});
+  const [newTitle,     setNewTitle]         = useState('');
+  const [newDateTime,  setNewDateTime]      = useState('');
+  const [editStates,   setEditStates]       = useState({});    // { [id]: { title, datetime } }
+  const timerRef        = useRef();
+
+  // 1) Fetch inicial de tasks y separación expired/upcoming
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const token  = localStorage.getItem('token');
+      const userId = getUserId();
+      if (!token || !userId) return;
+      try {
+        const { data } = await axios.get('/api/tasks', {
+          headers: { 'x-auth-token': token }
+        });
+        const all = Array.isArray(data) ? data : [];
+        setTasks(all);
+        const now = Date.now();
+        setExpiredReminders(
+          all.filter(t => new Date(t.startTime).getTime() <= now)
+             .sort((a,b)=> new Date(b.startTime) - new Date(a.startTime))
+        );
+        setUpcoming(
+          all.filter(t => new Date(t.startTime).getTime() > now)
+             .sort((a,b)=> new Date(a.startTime) - new Date(b.startTime))
+        );
+      } catch (err) {
+        console.error('Error cargando tareas:', err);
+      }
+    };
+    fetchTasks();
+    return () => clearInterval(timerRef.current);
+  }, []);
+
+  // 2) Countdown para próximas tareas
+  useEffect(() => {
+    if (!upcoming.length) return;
+    const updateCounts = () => {
+      const now = Date.now();
+      const counts = {};
+      upcoming.forEach(t => {
+        const diff = new Date(t.startTime).getTime() - now;
+        if (diff > 0) {
+          const d = String(Math.floor(diff / 86400000)).padStart(2,'0');
+          const h = String(Math.floor((diff % 86400000)/3600000)).padStart(2,'0');
+          const m = String(Math.floor((diff % 3600000)/60000)).padStart(2,'0');
+          const s = String(Math.floor((diff % 60000)/1000)).padStart(2,'0');
+          counts[t._id] = `${d}:${h}:${m}:${s}`;
+        } else {
+          counts[t._id] = '00:00:00:00';
+        }
+      });
+      setCountdowns(counts);
+    };
+    updateCounts();
+    timerRef.current = setInterval(updateCounts, 1000);
+    return () => clearInterval(timerRef.current);
+  }, [upcoming]);
+
+  // 3) Crear reminder
+  const handleCreate = async () => {
+    const token = localStorage.getItem('token');
+    if (!newTitle || !newDateTime || !token) return;
+    try {
+      await axios.post(
+        '/api/tasks',
+        { title: newTitle, startTime: newDateTime, endTime: newDateTime },
+        { headers: { 'x-auth-token': token } }
+      );
+      setNewTitle(''); setNewDateTime(''); setShowModal(false);
+      // refrescar
+      const { data } = await axios.get('/api/tasks', {
+        headers: { 'x-auth-token': token }
+      });
+      setTasks(Array.isArray(data)? data : []);
+      const now = Date.now();
+      setExpiredReminders(data.filter(t=>new Date(t.startTime)<=now));
+      setUpcoming(data.filter(t=>new Date(t.startTime)>now));
+    } catch (err) {
+      console.error('Error creando recordatorio:', err);
+    }
   };
 
-  const handleLogout = () => {
-    navigate('/');
+  // 4) Abrir modal de gestión inicializando editStates
+  const openManage = () => {
+    const init = {};
+    tasks.forEach(t => {
+      init[t._id] = {
+        title:    t.title,
+        datetime: t.startTime.slice(0,16)
+      };
+    });
+    setEditStates(init);
+    setShowManage(true);
   };
+
+  // 5) Editar reminder
+  const handleEdit = async (id) => {
+    const token = localStorage.getItem('token');
+    const { title, datetime } = editStates[id] || {};
+    if (!title || !datetime) return;
+    try {
+      await axios.put(
+        `/api/tasks/${id}`,
+        { title, startTime: datetime, endTime: datetime },
+        { headers: { 'x-auth-token': token } }
+      );
+      // refrescar
+      const { data } = await axios.get('/api/tasks', {
+        headers: { 'x-auth-token': token }
+      });
+      setTasks(Array.isArray(data)? data : []);
+      const now = Date.now();
+      setExpiredReminders(data.filter(t=>new Date(t.startTime)<=now));
+      setUpcoming(data.filter(t=>new Date(t.startTime)>now));
+    } catch (err) {
+      console.error('Error editando recordatorio:', err);
+    }
+  };
+
+  // 6) Eliminar reminder
+  const handleDelete = async (id) => {
+    const token = localStorage.getItem('token');
+    try {
+      await axios.delete(`/api/tasks/${id}`, {
+        headers: { 'x-auth-token': token }
+      });
+      setTasks(ts => ts.filter(t=>t._id!==id));
+      setExpiredReminders(er => er.filter(t=>t._id!==id));
+      setUpcoming(up=>up.filter(t=>t._id!==id));
+    } catch (err) {
+      console.error('Error eliminando recordatorio:', err);
+    }
+  };
+
+  // 7) Decorar calendario
+  const tileContent = ({ date, view }) => {
+    if (view==='month') {
+      const day = date.toISOString().slice(0,10);
+      const has = upcoming.some(t=>t.startTime.slice(0,10)===day)
+               || expiredReminders.some(t=>t.startTime.slice(0,10)===day);
+      return has ? <div className="task-dot" /> : null;
+    }
+    return null;
+  };
+
+  const togglePanel      = () => setShowPanel(v=>!v);
+  const handleDateChange = date => setSelectedDate(date);
+  const handleLogout     = ()   => navigate('/');
 
   return (
     <div className="home-container">
-      {/* Cabecera similar a la del Dashboard/Mensajería */}
       <header className="top-bar">
         <div className="left-section">
-          <i className="fa fa-user-circle user-icon" aria-hidden="true"></i>
+          <i className="fa fa-user-circle user-icon" />
         </div>
         <div className="center-section">
           <h1 className="title">JANUS</h1>
         </div>
         <div className="right-section">
-          <i className="fa fa-bell bell-icon" aria-hidden="true"></i>
+          <div className="notification-wrapper" onClick={togglePanel}>
+            <i className="fa fa-bell bell-icon" />
+            {expiredReminders.length>0 && <span className="notification-dot" />}
+          </div>
           <button className="logout-btn" onClick={handleLogout}>
-            <i className="fa fa-sign-out" aria-hidden="true"></i>
-            <span>Salir</span>
+            <i className="fa fa-sign-out" /><span>Salir</span>
           </button>
         </div>
       </header>
 
-      {/* Contenido principal */}
+      {showPanel && (
+        <div className="notification-panel">
+          <h3>Próximas actividades</h3>
+          {upcoming.length===0
+            ? <p>No hay actividades programadas.</p>
+            : upcoming.map(t=>(
+                <div key={t._id} className="notification-item">
+                  <div className="notif-title">{t.title}</div>
+                  <div className="notif-countdown">{countdowns[t._id]}</div>
+                </div>
+              ))
+          }
+        </div>
+      )}
+
       <main className="main-content">
-        {/* Sección de bienvenida */}
         <section className="intro-section">
           <h2>¡Bienvenido/a a JANUS!</h2>
-          <p>
-            Explora las distintas opciones que tenemos para ti. Elige una sección o revisa el calendario.
-          </p>
+          <p>Explora las opciones o gestiona tus recordatorios:</p>
+          <button className="create-task-btn" onClick={()=>setShowModal(true)}>
+            <i className="fa fa-plus" /> Añadir recordatorio
+          </button>
+          <button className="manage-btn" onClick={openManage}>
+            <i className="fa fa-cog" /> Gestionar Recordatorios
+          </button>
         </section>
 
         <div className="buttons-and-calendar">
-          {/* Bloque con los 5 botones */}
           <div className="buttons-block">
-            <button className="option-btn" onClick={() => navigate('/messaging')}>
-              <i className="fa fa-comments icon" aria-hidden="true"></i>
-              Mensajería
+            <button className="option-btn" onClick={()=>navigate('/messaging')}>
+              <i className="fa fa-comments icon" /> Mensajería
             </button>
-
-            <button className="option-btn" onClick={() => navigate('/time-machine-game')}>
-              <i className="fa fa-clock-o icon" aria-hidden="true"></i>
-              Máquina del Tiempo
+            <button className="option-btn" onClick={()=>navigate('/time-machine-game')}>
+              <i className="fa fa-clock-o icon" /> Máquina del Tiempo
             </button>
-
-            <button className="option-btn" onClick={() => navigate('/mi-planeta')}>
-              <i className="fa fa-globe icon" aria-hidden="true"></i>
-              Mi Planeta
+            <button className="option-btn" onClick={()=>navigate('/mi-planeta')}>
+              <i className="fa fa-globe icon" /> Mi Planeta
             </button>
-
-            <button className="option-btn" onClick={() => navigate('/patient/templates')}>
-            <i className="fa fa-folder-open icon" aria-hidden="true"></i>
-              Mis Plantillas
+            <button className="option-btn" onClick={()=>navigate('/patient/templates')}>
+              <i className="fa fa-folder-open icon" /> Mis Plantillas
             </button>
-
-            <button className="option-btn" onClick={() => navigate('/diario-de-emociones')}>
-              <i className="fa fa-book icon" aria-hidden="true"></i>
-              Mi diario de emociones
+            <button className="option-btn" onClick={()=>navigate('/diario-de-emociones')}>
+              <i className="fa fa-book icon" /> Mi diario de emociones
             </button>
           </div>
-
-          {/* Calendario interactivo */}
           <div className="calendar-block">
-            <Calendar onChange={handleDateChange} value={selectedDate} />
+            <Calendar
+              onChange={handleDateChange}
+              value={selectedDate}
+              tileContent={tileContent}
+            />
           </div>
         </div>
       </main>
 
-      {/* Pie de página similar al de otras pantallas */}
+      {/* Modal de creación */}
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Nuevo Recordatorio</h2>
+            <div className="create-task-form">
+              <label>
+                Título
+                <input
+                  type="text"
+                  value={newTitle}
+                  onChange={e=>setNewTitle(e.target.value)}
+                />
+              </label>
+              <label>
+                Fecha y hora
+                <input
+                  type="datetime-local"
+                  value={newDateTime}
+                  onChange={e=>setNewDateTime(e.target.value)}
+                />
+              </label>
+            </div>
+            <div className="modal-buttons">
+              <button className="save-btn" onClick={handleCreate}>Guardar</button>
+              <button className="cancel-btn" onClick={()=>setShowModal(false)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de gestión */}
+      {showManage && (
+        <div className="modal-overlay">
+          <div className="modal-content manage-content">
+            <h2>Gestionar Recordatorios</h2>
+            {tasks.length===0 ? (
+              <p>No tienes recordatorios.</p>
+            ) : (
+              <ul className="manage-list">
+                {tasks.map(t => {
+                  const { title, datetime } = editStates[t._id]||{};
+                  return (
+                    <li key={t._id} className="manage-item">
+                      <input
+                        value={title||''}
+                        onChange={e=>{
+                          setEditStates(es=>({
+                            ...es,
+                            [t._id]: { ...es[t._id], title: e.target.value }
+                          }));
+                        }}
+                      />
+                      <input
+                        type="datetime-local"
+                        value={datetime||''}
+                        onChange={e=>{
+                          setEditStates(es=>({
+                            ...es,
+                            [t._id]: { ...es[t._id], datetime: e.target.value }
+                          }));
+                        }}
+                      />
+                      <div className="manage-actions">
+                        <button onClick={()=>handleEdit(t._id)}>Guardar</button>
+                        <button onClick={()=>handleDelete(t._id)}>Eliminar</button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            <button className="cancel-btn" onClick={()=>setShowManage(false)}>Cerrar</button>
+          </div>
+        </div>
+      )}
+
       <footer className="footer-bar">
         <p>2025 © Iván Vela Campos</p>
       </footer>
     </div>
   );
 }
-
-export default Home;

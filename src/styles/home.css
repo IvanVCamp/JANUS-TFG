@@ -154,3 +154,92 @@
   padding: 10px 0;
   box-shadow: 0 -2px 5px rgba(0,0,0,0.3);
 }
+
+/* ── PUNTO ROJO sobre la campana ── */
+.notification-wrapper {
+  position: relative;
+  display: inline-block;
+}
+.notification-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  background: #f00;
+  border-radius: 50%;
+}
+
+/* ── Panel desplegable ── */
+.notification-panel {
+  position: absolute;
+  top: 60px;              /* justo debajo de la top-bar */
+  right: 20px;
+  width: 280px;
+  max-height: 400px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 1rem;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+/* Título del panel */
+.notification-panel h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+/* Cada ítem (actividad) */
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.notification-item:last-child {
+  border-bottom: none;
+}
+.notif-title {
+  font-size: 0.9rem;
+  color: #444;
+  flex: 1;
+}
+.notif-countdown {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #1976d2;
+  margin-left: 0.5rem;
+}
+
+/* Punto rojo en la campana */
+.notification-dot {
+  position: absolute;
+  top: 2px; right: 2px;
+  width: 8px; height: 8px;
+  background: #f00; border-radius: 50%;
+}
+
+/* Día con recordatorio */
+.task-dot {
+  width: 6px; height: 6px;
+  background-color: #FF5722;
+  border-radius: 50%;
+  margin: 0 auto; margin-top: 2px;
+}
+
+/* Botón crear */
+.create-task-btn {
+  background-color: #8b77f7; color: #fff;
+  border: none; padding: 8px 12px;
+  border-radius: 6px; cursor: pointer;
+  display: inline-flex; gap: 5px; align-items: center;
+  margin-top: 0.5rem;
+}
+.create-task-btn:hover { background-color: #7a69dd; }
