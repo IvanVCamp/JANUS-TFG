@@ -217,86 +217,106 @@
   }
 }
 
-/* -----------------------------------------------------------------------------
-   /therapist/session-notes – Estilización inspirada en routineTemplates.css
-------------------------------------------------------------------------------*/
-
-/* 1) Reset de fondo y tipografía global */
+/* Contenedor principal */
 .therapist-session-notes-list {
+  padding: 20px;
   font-family: 'Poppins', sans-serif;
-  background: var(--light-bg);
-  color: var(--text-color);
+  background-color: #f5f5f5;
   min-height: 100vh;
-  margin: 0;
-  padding: 2rem 1rem;
 }
 
-/* 2) Contenedor principal centrado */
-.therapist-session-notes-list .patients-grid {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1.5rem;
-  padding: 0;
-}
-
-/* 3) Título de la página */
-.therapist-session-notes-list > h1 {
+/* Título centrado */
+.therapist-session-notes-list h1 {
   text-align: center;
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--primary-color);
-  margin-bottom: 2rem;
+  margin-bottom: 20px;
+  color: #333;
 }
 
-/* 4) Tarjetas de paciente */
-.patient-note-card {
-  position: relative;
-  background: var(--card-bg);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-light);
-  padding: 1.5rem;
-  text-decoration: none;
-  color: inherit;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* Grid de tarjetas de paciente para notas */
+.patients-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
 }
+
+/* Tarjeta individual */
+.patient-note-card {
+  background-color: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #333;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.patient-note-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  color: var(--primary-color);
+}
+
+.patient-note-card small {
+  color: #666;
+  margin-bottom: 12px;
+}
+
+/* Hover eleva la tarjeta */
 .patient-note-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
 }
 
-/* 5) Contenido de la tarjeta */
-.patient-note-card h3 {
-  margin: 0 0 0.5rem;
-  font-size: 1.2rem;
-  color: var(--primary-color);
-}
-.patient-note-card small {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  display: block;
+/* Botón de volver al listado */
+.back-link {
+  display: inline-block;
   margin-bottom: 1rem;
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s, background 0.2s;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.back-link:hover {
+  background: var(--primary-light);
+  color: var(--primary-dark);
 }
 
-/* 6) Icono de notas en la esquina */
-.patient-note-card::after {
-  content: '\f02e'; /* Unicode de FontAwesome para notas: “sticky-note-o” */
-  font-family: 'FontAwesome';
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  font-size: 1.4rem;
-  color: var(--secondary-color);
-  opacity: 0.6;
-}
-.patient-note-card:hover::after {
-  opacity: 1;
+/* Modal de notas (heredado de PatientsList) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }
 
-/* 7) Responsive: una columna en móvil */
-@media (max-width: 768px) {
-  .therapist-session-notes-list .patients-grid {
+.modal-content {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  color: #7c63f6;
+}
+
+/* Responsive: una columna en móvil */
+@media (max-width: 600px) {
+  .patients-grid {
     grid-template-columns: 1fr;
   }
 }
