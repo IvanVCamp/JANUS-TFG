@@ -36,6 +36,7 @@ app.use('/api/invitations', require('./backend/routes/invitations.routes'));
 app.use('/api/therapist', require('./backend/routes/therapist.routes'));
 app.use('/api/routines/instances', require('./backend/routes/routineInstances.routes'));
 app.use('/api/routines/templates', require('./backend/routes/routineTemplate.routes'));
+app.use('/api/therapist/patients', require('./backend/routes/sessionNotes.routes'));
 app.get('*', (req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
 });

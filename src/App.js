@@ -25,6 +25,8 @@ import EditRoutineTemplatePage from './components/EditRoutineTemplatePage';
 import PatientTemplatesPage      from './components/PatientTemplatesPage';
 import PatientTemplateDetail from './components/PatientTemplateDetail';
 import TherapistPatientTemplatesDetail from './components/TherapistTemplatesDetail';
+import TherapistSessionNotes         from './components/TherapistSessionNotes';
+import TherapistSessionNotesDetail   from './components/TherapistSessionNotesDetail';
 function App() {
   return (
     <Router>
@@ -54,6 +56,9 @@ function App() {
         <Route path="/patient/templates" element={<PatientTemplatesPage />} />
         <Route path="/patient/templates/:instanceId" element={<PatientTemplateDetail />} />
         <Route path="/therapist/templates/:patientId"element={<TherapistPatientTemplatesDetail />}/>
+        <Route path="/therapist/templates"               element={<TherapistTemplates />} />
+        <Route path="/therapist/session-notes"           element={<TherapistSessionNotes />} />
+        <Route path="/therapist/session-notes/:patientId" element={<TherapistSessionNotesDetail />} />
         </Routes>
     </Router>
   );

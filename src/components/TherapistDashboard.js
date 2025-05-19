@@ -1,43 +1,41 @@
-// TherapistDashboardHome.js
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Calendar from 'react-calendar';
-import axios from 'axios';
+// src/components/TherapistDashboardHome.js
+
+import React, { useState }      from 'react';
+import { useNavigate }          from 'react-router-dom';
+import Calendar                 from 'react-calendar';
+import axios                    from 'axios';
 import '../styles/therapistDashboard.css';
 
-function TherapistDashboard() {
-  const navigate = useNavigate();
+function TherapistDashboardHome() {
+  const navigate       = useNavigate();
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showModal, setShowModal] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteMsg, setInviteMsg] = useState('');
+  const [showModal, setShowModal]       = useState(false);
+  const [inviteEmail, setInviteEmail]   = useState('');
+  const [inviteMsg, setInviteMsg]       = useState('');
 
-  const handleLogout = () => {
-    navigate('/');
-  };
+  const handleLogout = () => navigate('/');
 
   const handleInvitationSubmit = async () => {
-    // Validación simple del correo
     const emailTrimmed = inviteEmail.trim();
-  if (!emailTrimmed) {
-    setInviteMsg('Por favor, ingresa un correo electrónico válido.');
-    return;
-  }
-  try {
-    const token = localStorage.getItem('token');
-    await axios.post(
-      '/api/invitations',
-      { invitedEmail: emailTrimmed },
-      { headers: { 'Content-Type': 'application/json', 'x-auth-token': token } }
-    );
-    setInviteMsg('Invitación enviada con éxito.');
-    setShowModal(false);
-    setInviteEmail('');
-  } catch (err) {
-    console.error(err.response.data);
-    setInviteMsg(err.response.data.msg || 'Error al enviar la invitación.');
-  }
-};
+    if (!emailTrimmed) {
+      setInviteMsg('Por favor, ingresa un correo electrónico válido.');
+      return;
+    }
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(
+        '/api/invitations',
+        { invitedEmail: emailTrimmed },
+        { headers: { 'Content-Type': 'application/json', 'x-auth-token': token } }
+      );
+      setInviteMsg('Invitación enviada con éxito.');
+      setShowModal(false);
+      setInviteEmail('');
+    } catch (err) {
+      console.error(err.response.data);
+      setInviteMsg(err.response.data.msg || 'Error al enviar la invitación.');
+    }
+  };
 
   return (
     <div className="home-container">
@@ -64,42 +62,51 @@ function TherapistDashboard() {
           <h2>¡Bienvenido, Terapeuta!</h2>
           <p>Accede a tus herramientas y consulta la información estadística de tus pacientes.</p>
         </section>
+
         <div className="buttons-and-calendar">
           <div className="buttons-block">
             <div className="button-group">
               <h3>HERRAMIENTAS DE GESTIÓN</h3>
               <button className="option-btn" onClick={() => navigate('/therapist/patients')}>
-                <i className="fa fa-users icon" aria-hidden="true"></i>
+                <i className="fa fa-users icon"></i>
                 Lista de Pacientes
               </button>
               <button className="option-btn" onClick={() => navigate('/messaging')}>
-                <i className="fa fa-comments icon" aria-hidden="true"></i>
+                <i className="fa fa-comments icon"></i>
                 Mensajería
               </button>
               <button className="option-btn" onClick={() => setShowModal(true)}>
-                <i className="fa fa-envelope icon" aria-hidden="true"></i>
+                <i className="fa fa-envelope icon"></i>
                 Generar Invitación
               </button>
               <button className="option-btn" onClick={() => navigate('/therapist/templates')}>
-                <i className="fa fa-file-text icon"></i> Plantillas
+                <i className="fa fa-file-text icon"></i>
+                Plantillas
+              </button>
+              {/* ← Nuevo botón de Notas de Sesión */}
+              <button className="option-btn" onClick={() => navigate('/therapist/session-notes')}>
+                <i className="fa fa-sticky-note-o icon" aria-hidden="true"></i>
+                Notas de Sesión
               </button>
             </div>
+
             <div className="button-group">
               <h3>INFORMACIÓN ESTADÍSTICA</h3>
               <button className="option-btn" onClick={() => navigate('/therapist/routines')}>
-                <i className="fa fa-clock-o icon" aria-hidden="true"></i>
+                <i className="fa fa-clock-o icon"></i>
                 Rutinas y Tiempo
               </button>
               <button className="option-btn" onClick={() => navigate('/therapist/interests')}>
-                <i className="fa fa-line-chart icon" aria-hidden="true"></i>
+                <i className="fa fa-line-chart icon"></i>
                 Intereses
               </button>
               <button className="option-btn" onClick={() => navigate('/therapist/satisfaction')}>
-                <i className="fa fa-smile-o icon" aria-hidden="true"></i>
+                <i className="fa fa-smile-o icon"></i>
                 Satisfacción
               </button>
             </div>
           </div>
+
           <div className="calendar-block">
             <Calendar onChange={setSelectedDate} value={selectedDate} />
           </div>
@@ -135,4 +142,4 @@ function TherapistDashboard() {
   );
 }
 
-export default TherapistDashboard;
+export default TherapistDashboardHome;

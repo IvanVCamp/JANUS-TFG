@@ -1,0 +1,302 @@
+.therapist-session-notes-detail {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  background: var(--light-bg);
+  color: var(--text-color);
+  padding: 0;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* 2) Contenedor principal */
+.therapist-session-notes-detail .detail-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  padding: 2rem;
+}
+
+/* 3) Cabecera y back-link */
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.back-link {
+  font-size: 1rem;
+  color: var(--primary-color);
+  text-decoration: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--border-radius);
+  transition: background 0.3s, color 0.3s;
+}
+.back-link:hover {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+/* 4) Sección de Información Contextual */
+.context-comments {
+  background: #ffffff;
+  border-left: 6px solid var(--secondary-color);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+}
+.context-comments h2 {
+  margin-top: 0;
+  font-size: 1.4rem;
+  color: var(--primary-color);
+}
+.context-comments p {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+  color: #555;
+}
+
+/* 5) Barra de filtros y export */
+.filter-export-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+.date-filter label {
+  font-size: 0.95rem;
+  color: #444;
+  margin-right: 1rem;
+}
+.date-filter input {
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius);
+  padding: 0.4rem;
+  font-size: 0.95rem;
+}
+.export-btn {
+  background: var(--secondary-color);
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  box-shadow: var(--shadow-light);
+  transition: background 0.3s, transform 0.2s;
+}
+.export-btn:hover {
+  background: #2e7d32;
+  transform: translateY(-2px);
+}
+
+/* 6) Formulario nueva nota */
+.new-note-form {
+  background: var(--light-bg);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+.new-note-form label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+.new-note-form input,
+.new-note-form textarea {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius);
+  padding: 0.6rem;
+  font-size: 1rem;
+  margin-top: 0.3rem;
+  transition: border-color 0.3s;
+}
+.new-note-form input:focus,
+.new-note-form textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+.new-note-form button {
+  background: var(--primary-color);
+  color: #fff;
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-light);
+  transition: background 0.3s, transform 0.2s;
+  margin-top: 1rem;
+}
+.new-note-form button:hover {
+  background: #135ba1;
+  transform: translateY(-2px);
+}
+
+/* 7) Listado de notas */
+.notes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.note-item {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.note-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+.note-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+.note-meta i {
+  margin-right: 0.3rem;
+}
+.note-content {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #333;
+}
+
+/* 8) Quick-note en pie */
+.quick-note {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 2rem;
+}
+.quick-note input {
+  flex: 1;
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius);
+  padding: 0.6rem;
+  font-size: 1rem;
+}
+.quick-note button {
+  background: var(--secondary-color);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s, transform 0.2s;
+}
+.quick-note button:hover {
+  background: #2e7d32;
+  transform: translateY(-2px);
+}
+
+/* 9) Responsive */
+@media (max-width: 768px) {
+  .filter-export-bar,
+  .date-filter,
+  .export-btn {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .filter-export-bar {
+    gap: 1rem;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   /therapist/session-notes – Estilización inspirada en routineTemplates.css
+------------------------------------------------------------------------------*/
+
+/* 1) Reset de fondo y tipografía global */
+.therapist-session-notes-list {
+  font-family: 'Poppins', sans-serif;
+  background: var(--light-bg);
+  color: var(--text-color);
+  min-height: 100vh;
+  margin: 0;
+  padding: 2rem 1rem;
+}
+
+/* 2) Contenedor principal centrado */
+.therapist-session-notes-list .patients-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+  padding: 0;
+}
+
+/* 3) Título de la página */
+.therapist-session-notes-list > h1 {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 2rem;
+}
+
+/* 4) Tarjetas de paciente */
+.patient-note-card {
+  position: relative;
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  padding: 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.patient-note-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+/* 5) Contenido de la tarjeta */
+.patient-note-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.2rem;
+  color: var(--primary-color);
+}
+.patient-note-card small {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 1rem;
+}
+
+/* 6) Icono de notas en la esquina */
+.patient-note-card::after {
+  content: '\f02e'; /* Unicode de FontAwesome para notas: “sticky-note-o” */
+  font-family: 'FontAwesome';
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.4rem;
+  color: var(--secondary-color);
+  opacity: 0.6;
+}
+.patient-note-card:hover::after {
+  opacity: 1;
+}
+
+/* 7) Responsive: una columna en móvil */
+@media (max-width: 768px) {
+  .therapist-session-notes-list .patients-grid {
+    grid-template-columns: 1fr;
+  }
+}
