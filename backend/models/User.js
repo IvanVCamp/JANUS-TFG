@@ -9,7 +9,8 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, required: true },
   assignedTherapist: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Nuevo campo para pacientes
-  date: { type: Date, default: Date.now }
+  date: { type: Date, default: Date.now },
+  avatar: { type: String, default: '' }
 });
 
 module.exports = mongoose.model('User', UserSchema);

@@ -10,7 +10,7 @@ exports.getPatients = async (req, res) => {
         { assignedTherapist: { $exists: false } },
         { assignedTherapist: null }
       ]
-    }).select('nombre apellidos fechaNacimiento email');
+    }).select('nombre apellidos fechaNacimiento email avatar');
     res.json(patients);
   } catch (err) {
     console.error('Error al obtener pacientes:', err);

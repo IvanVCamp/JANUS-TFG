@@ -243,3 +243,113 @@
   margin-top: 0.5rem;
 }
 .create-task-btn:hover { background-color: #7a69dd; }
+
+/* src/styles/home.css */
+
+/* Perfil */
+.home-container .user-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+/* Modal cambio perfil */
+.home-container .profile-modal .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.home-container .profile-modal .modal-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 380px;
+  width: 90%;
+  text-align: center;
+}
+
+.user-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid var(--primary-light);
+}
+
+.profile-modal .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.profile-modal-content {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: 280px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.current-profile {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 1rem;
+}
+.profile-modal-content input[type="file"] {
+  margin-bottom: 1rem;
+}
+.profile-modal-content button {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  background: var(--primary-color);
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.profile-modal-content button:hover {
+  background: var(--primary-dark);
+}
+
+.home-container .profile-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 1rem;
+}
+.home-container .profile-modal input[type="file"] {
+  margin-bottom: 1rem;
+}
+.home-container .profile-modal .modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+.home-container .profile-modal .modal-buttons button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: var(--primary-color);
+  color: #fff;
+  transition: background 0.2s;
+}
+.home-container .profile-modal .modal-buttons button:hover {
+  background: var(--primary-dark);
+}

@@ -1,195 +1,225 @@
 // src/components/Dashboard.js
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Calendar from 'react-calendar';
-import axios from 'axios';
-import 'react-calendar/dist/Calendar.css';
-import '../styles/home.css';
-import '../styles/taskPlanner.css';
+import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate }                       from 'react-router-dom'
+import Calendar                              from 'react-calendar'
+import axios                                 from 'axios'
+import 'react-calendar/dist/Calendar.css'
+import defaultProfile                        from '../assets/default-profile.png'
+import '../styles/home.css'
+import '../styles/taskPlanner.css'
 
-// helper para extraer userId del JWT
 function decodeJwt(token) {
   try {
-    const b64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
-    return JSON.parse(atob(b64));
+    const b64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')
+    return JSON.parse(atob(b64))
   } catch {
-    return null;
+    return null
   }
 }
 function getUserId() {
-  const raw = localStorage.getItem('token');
-  if (!raw) return null;
-  const token  = raw.startsWith('Bearer ') ? raw.slice(7) : raw;
-  const payload = decodeJwt(token);
-  return payload?.id || payload?.sub || payload?.user?.id || null;
+  const raw = localStorage.getItem('token')
+  if (!raw) return null
+  const token  = raw.startsWith('Bearer ') ? raw.slice(7) : raw
+  const payload = decodeJwt(token)
+  return payload?.id || payload?.sub || payload?.user?.id || null
 }
 
-export default function Home() {
-  const navigate             = useNavigate();
-  const [selectedDate, setSelectedDate]     = useState(new Date());
-  const [showPanel,    setShowPanel]        = useState(false);
-  const [showModal,    setShowModal]        = useState(false);
-  const [showManage,   setShowManage]       = useState(false);
-  const [tasks,        setTasks]            = useState([]);    // todos los reminders
-  const [upcoming,     setUpcoming]         = useState([]);    // futuros
-  const [expiredReminders, setExpiredReminders] = useState([]);
-  const [countdowns,   setCountdowns]       = useState({});
-  const [newTitle,     setNewTitle]         = useState('');
-  const [newDateTime,  setNewDateTime]      = useState('');
-  const [editStates,   setEditStates]       = useState({});    // { [id]: { title, datetime } }
-  const timerRef        = useRef();
+export default function Dashboard() {
+  const navigate             = useNavigate()
+  const [selectedDate, setSelectedDate]         = useState(new Date())
+  const [showPanel, setShowPanel]                = useState(false)
+  const [showModal, setShowModal]                = useState(false)
+  const [showManage, setShowManage]              = useState(false)
+  const [showProfileModal, setShowProfileModal]  = useState(false)
+  const [tasks, setTasks]                        = useState([])
+  const [upcoming, setUpcoming]                  = useState([])
+  const [expiredReminders, setExpiredReminders]  = useState([])
+  const [countdowns, setCountdowns]              = useState({})
+  const [newTitle, setNewTitle]                  = useState('')
+  const [newDateTime, setNewDateTime]            = useState('')
+  const [editStates, setEditStates]              = useState({})
+  const timerRef                                = useRef()
+  const [profilePic, setProfilePic]              = useState(defaultProfile)
 
-  // 1) Fetch inicial de tasks y separación expired/upcoming
+  useEffect(() => {
+    const saved = localStorage.getItem('profilePicPatient')
+    if (saved) setProfilePic(saved)
+    else {
+      const token = localStorage.getItem('token')
+      axios.get('/api/users/me', {
+        headers: { 'x-auth-token': token }
+      }).then(({ data }) => {
+        setProfilePic(data.avatar || defaultProfile)
+      }).catch(console.error)
+    }
+  }, [])
+
+  const handleProfileClick = () => setShowProfileModal(true)
+
+  const handleProfileChange = e => {
+    const file = e.target.files[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) return
+    const formData = new FormData()
+    formData.append('avatar', file)
+    const token = localStorage.getItem('token')
+    axios.put('/api/users/me/avatar', formData, {
+      headers: {
+        'x-auth-token': token,
+        'Content-Type': 'multipart/form-data'
+      }
+    }).then(({ data }) => {
+      setProfilePic(data.avatar)
+      localStorage.setItem('profilePicPatient', data.avatar)
+      setShowProfileModal(false)
+    }).catch(console.error)
+  }
+
   useEffect(() => {
     const fetchTasks = async () => {
-      const token  = localStorage.getItem('token');
-      const userId = getUserId();
-      if (!token || !userId) return;
+      const token = localStorage.getItem('token')
+      const userId = getUserId()
+      if (!token || !userId) return
       try {
         const { data } = await axios.get('/api/tasks', {
           headers: { 'x-auth-token': token }
-        });
-        const all = Array.isArray(data) ? data : [];
-        setTasks(all);
-        const now = Date.now();
+        })
+        const all = Array.isArray(data) ? data : []
+        setTasks(all)
+        const now = Date.now()
         setExpiredReminders(
           all.filter(t => new Date(t.startTime).getTime() <= now)
              .sort((a,b)=> new Date(b.startTime) - new Date(a.startTime))
-        );
+        )
         setUpcoming(
           all.filter(t => new Date(t.startTime).getTime() > now)
              .sort((a,b)=> new Date(a.startTime) - new Date(b.startTime))
-        );
+        )
       } catch (err) {
-        console.error('Error cargando tareas:', err);
+        console.error('Error cargando tareas:', err)
       }
-    };
-    fetchTasks();
-    return () => clearInterval(timerRef.current);
-  }, []);
+    }
+    fetchTasks()
+    return () => clearInterval(timerRef.current)
+  }, [])
 
-  // 2) Countdown para próximas tareas
   useEffect(() => {
-    if (!upcoming.length) return;
+    if (!upcoming.length) return
     const updateCounts = () => {
-      const now = Date.now();
-      const counts = {};
+      const now = Date.now()
+      const counts = {}
       upcoming.forEach(t => {
-        const diff = new Date(t.startTime).getTime() - now;
+        const diff = new Date(t.startTime).getTime() - now
         if (diff > 0) {
-          const d = String(Math.floor(diff / 86400000)).padStart(2,'0');
-          const h = String(Math.floor((diff % 86400000)/3600000)).padStart(2,'0');
-          const m = String(Math.floor((diff % 3600000)/60000)).padStart(2,'0');
-          const s = String(Math.floor((diff % 60000)/1000)).padStart(2,'0');
-          counts[t._id] = `${d}:${h}:${m}:${s}`;
+          const d = String(Math.floor(diff / 86400000)).padStart(2,'0')
+          const h = String(Math.floor((diff % 86400000)/3600000)).padStart(2,'0')
+          const m = String(Math.floor((diff % 3600000)/60000)).padStart(2,'0')
+          const s = String(Math.floor((diff % 60000)/1000)).padStart(2,'0')
+          counts[t._id] = `${d}:${h}:${m}:${s}`
         } else {
-          counts[t._id] = '00:00:00:00';
+          counts[t._id] = '00:00:00:00'
         }
-      });
-      setCountdowns(counts);
-    };
-    updateCounts();
-    timerRef.current = setInterval(updateCounts, 1000);
-    return () => clearInterval(timerRef.current);
-  }, [upcoming]);
+      })
+      setCountdowns(counts)
+    }
+    updateCounts()
+    timerRef.current = setInterval(updateCounts, 1000)
+    return () => clearInterval(timerRef.current)
+  }, [upcoming])
 
-  // 3) Crear reminder
   const handleCreate = async () => {
-    const token = localStorage.getItem('token');
-    if (!newTitle || !newDateTime || !token) return;
+    const token = localStorage.getItem('token')
+    if (!newTitle || !newDateTime || !token) return
     try {
       await axios.post(
         '/api/tasks',
         { title: newTitle, startTime: newDateTime, endTime: newDateTime },
         { headers: { 'x-auth-token': token } }
-      );
-      setNewTitle(''); setNewDateTime(''); setShowModal(false);
-      // refrescar
+      )
+      setNewTitle(''); setNewDateTime(''); setShowModal(false)
       const { data } = await axios.get('/api/tasks', {
         headers: { 'x-auth-token': token }
-      });
-      setTasks(Array.isArray(data)? data : []);
-      const now = Date.now();
-      setExpiredReminders(data.filter(t=>new Date(t.startTime)<=now));
-      setUpcoming(data.filter(t=>new Date(t.startTime)>now));
+      })
+      const all = Array.isArray(data) ? data : []
+      setTasks(all)
+      const now = Date.now()
+      setExpiredReminders(all.filter(t=> new Date(t.startTime)<=now))
+      setUpcoming(all.filter(t=> new Date(t.startTime)>now))
     } catch (err) {
-      console.error('Error creando recordatorio:', err);
+      console.error('Error creando recordatorio:', err)
     }
-  };
+  }
 
-  // 4) Abrir modal de gestión inicializando editStates
   const openManage = () => {
-    const init = {};
+    const init = {}
     tasks.forEach(t => {
-      init[t._id] = {
-        title:    t.title,
-        datetime: t.startTime.slice(0,16)
-      };
-    });
-    setEditStates(init);
-    setShowManage(true);
-  };
+      init[t._id] = { title: t.title, datetime: t.startTime.slice(0,16) }
+    })
+    setEditStates(init)
+    setShowManage(true)
+  }
 
-  // 5) Editar reminder
-  const handleEdit = async (id) => {
-    const token = localStorage.getItem('token');
-    const { title, datetime } = editStates[id] || {};
-    if (!title || !datetime) return;
+  const handleEdit = async id => {
+    const token = localStorage.getItem('token')
+    const { title, datetime } = editStates[id]||{}
+    if (!title||!datetime) return
     try {
       await axios.put(
         `/api/tasks/${id}`,
         { title, startTime: datetime, endTime: datetime },
         { headers: { 'x-auth-token': token } }
-      );
-      // refrescar
+      )
       const { data } = await axios.get('/api/tasks', {
         headers: { 'x-auth-token': token }
-      });
-      setTasks(Array.isArray(data)? data : []);
-      const now = Date.now();
-      setExpiredReminders(data.filter(t=>new Date(t.startTime)<=now));
-      setUpcoming(data.filter(t=>new Date(t.startTime)>now));
+      })
+      const all = Array.isArray(data)? data : []
+      setTasks(all)
+      const now = Date.now()
+      setExpiredReminders(all.filter(t=> new Date(t.startTime)<=now))
+      setUpcoming(all.filter(t=> new Date(t.startTime)>now))
     } catch (err) {
-      console.error('Error editando recordatorio:', err);
+      console.error('Error editando recordatorio:', err)
     }
-  };
+  }
 
-  // 6) Eliminar reminder
-  const handleDelete = async (id) => {
-    const token = localStorage.getItem('token');
+  const handleDelete = async id => {
+    const token = localStorage.getItem('token')
     try {
       await axios.delete(`/api/tasks/${id}`, {
         headers: { 'x-auth-token': token }
-      });
-      setTasks(ts => ts.filter(t=>t._id!==id));
-      setExpiredReminders(er => er.filter(t=>t._id!==id));
-      setUpcoming(up=>up.filter(t=>t._id!==id));
+      })
+      setTasks(ts=> ts.filter(t=>t._id!==id))
+      setExpiredReminders(er=> er.filter(t=>t._id!==id))
+      setUpcoming(up=> up.filter(t=>t._id!==id))
     } catch (err) {
-      console.error('Error eliminando recordatorio:', err);
+      console.error('Error eliminando recordatorio:', err)
     }
-  };
+  }
 
-  // 7) Decorar calendario
   const tileContent = ({ date, view }) => {
     if (view==='month') {
-      const day = date.toISOString().slice(0,10);
+      const day = date.toISOString().slice(0,10)
       const has = upcoming.some(t=>t.startTime.slice(0,10)===day)
-               || expiredReminders.some(t=>t.startTime.slice(0,10)===day);
-      return has ? <div className="task-dot" /> : null;
+               || expiredReminders.some(t=>t.startTime.slice(0,10)===day)
+      return has ? <div className="task-dot" /> : null
     }
-    return null;
-  };
+    return null
+  }
 
-  const togglePanel      = () => setShowPanel(v=>!v);
-  const handleDateChange = date => setSelectedDate(date);
-  const handleLogout     = ()   => navigate('/');
+  const togglePanel = () => setShowPanel(v=>!v)
+  const handleDateChange = date => setSelectedDate(date)
 
   return (
     <div className="home-container">
       <header className="top-bar">
         <div className="left-section">
-          <i className="fa fa-user-circle user-icon" />
+          <img
+            src={profilePic}
+            alt="Perfil"
+            className="user-icon"
+            onClick={handleProfileClick}
+          />
         </div>
         <div className="center-section">
           <h1 className="title">JANUS</h1>
@@ -199,11 +229,22 @@ export default function Home() {
             <i className="fa fa-bell bell-icon" />
             {expiredReminders.length>0 && <span className="notification-dot" />}
           </div>
-          <button className="logout-btn" onClick={handleLogout}>
+          <button className="logout-btn" onClick={()=>navigate('/')}>
             <i className="fa fa-sign-out" /><span>Salir</span>
           </button>
         </div>
       </header>
+
+      {showProfileModal && (
+        <div className="modal-overlay profile-modal">
+          <div className="modal-content profile-modal-content">
+            <h2>Actualizar foto de perfil</h2>
+            <img src={profilePic} alt="Actual" className="current-profile" />
+            <input type="file" accept="image/*" onChange={handleProfileChange} />
+            <button onClick={()=>setShowProfileModal(false)}>Cancelar</button>
+          </div>
+        </div>
+      )}
 
       {showPanel && (
         <div className="notification-panel">
@@ -260,7 +301,6 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Modal de creación */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -291,7 +331,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Modal de gestión */}
       {showManage && (
         <div className="modal-overlay">
           <div className="modal-content manage-content">
@@ -301,16 +340,15 @@ export default function Home() {
             ) : (
               <ul className="manage-list">
                 {tasks.map(t => {
-                  const { title, datetime } = editStates[t._id]||{};
+                  const { title, datetime } = editStates[t._id]||{}
                   return (
                     <li key={t._id} className="manage-item">
                       <input
                         value={title||''}
                         onChange={e=>{
                           setEditStates(es=>({
-                            ...es,
-                            [t._id]: { ...es[t._id], title: e.target.value }
-                          }));
+                            ...es,[t._id]:{...es[t._id],title:e.target.value}
+                          }))
                         }}
                       />
                       <input
@@ -318,9 +356,8 @@ export default function Home() {
                         value={datetime||''}
                         onChange={e=>{
                           setEditStates(es=>({
-                            ...es,
-                            [t._id]: { ...es[t._id], datetime: e.target.value }
-                          }));
+                            ...es,[t._id]:{...es[t._id],datetime:e.target.value}
+                          }))
                         }}
                       />
                       <div className="manage-actions">
@@ -328,7 +365,7 @@ export default function Home() {
                         <button onClick={()=>handleDelete(t._id)}>Eliminar</button>
                       </div>
                     </li>
-                  );
+                  )
                 })}
               </ul>
             )}
@@ -341,5 +378,5 @@ export default function Home() {
         <p>2025 © Iván Vela Campos</p>
       </footer>
     </div>
-  );
+  )
 }
