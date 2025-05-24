@@ -1,6 +1,6 @@
 // src/components/TherapistRoutines.js
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/patientsList.css'; // reutiliza el CSS existente
 
@@ -32,7 +32,11 @@ function TherapistRoutines() {
 
   return (
     <div className="therapist-patient-list">
-      <h1>Pacientes - Equilibrio Ocupacional</h1>
+      <div className="patients-header">
+        <Link to="/therapist" className="back-link">← Volver</Link>
+        <h1>Pacientes – Rutinas</h1>
+      </div>
+
       {loading ? (
         <p>Cargando pacientes...</p>
       ) : (

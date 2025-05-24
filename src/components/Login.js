@@ -21,10 +21,10 @@ function Login() {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       // Redireccionar según el rol devuelto:
-      if(response.data.role === 'terapeuta') {
-        navigate('/therapist');
-      } else {
+      if(response.data.role === 'paciente') {
         navigate('/dashboard');
+      } else {
+        navigate('/therapist');
       }
     } catch (err) {
       setError('Credenciales inválidas');

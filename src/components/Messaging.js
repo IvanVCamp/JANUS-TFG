@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import chatService from '../services/chatService';
 import '../styles/messaging.css';
+import axios from 'axios';
 
 function Messaging() {
   const navigate = useNavigate();
 
   // ID del usuario actual
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [currentUserRole, setCurrentUserRole] = useState(null);
 
   // Lista de chats, chat seleccionado, mensajes
   const [chats, setChats] = useState([]);
@@ -26,12 +28,21 @@ function Messaging() {
   const [filePreview, setFilePreview] = useState(null);
 
   // Decodificar el token para obtener el ID del usuario (simplificado)
+    function decodeJwt(token) {
+    try {
+      const b64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+      return JSON.parse(atob(b64));
+    } catch {
+      return {};
+    }
+  }
+
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {
-      const decoded = JSON.parse(atob(token.split('.')[1])); 
-      setCurrentUserId(decoded.user?.id);
-    }
+    if (!token) return;
+    const payload = decodeJwt(token);
+    setCurrentUserId(payload.user?.id || payload.id || payload.sub);
+    setCurrentUserRole(payload.user?.role || payload.role);
   }, []);
 
   // Cargar la lista de chats
@@ -151,7 +162,11 @@ function Messaging() {
 
   // Botón para regresar al Dashboard
   const handleGoDashboard = () => {
-    navigate('/dashboard');
+    if (currentUserRole === 'terapeuta') {
+      navigate('/therapist');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   const getOtherParticipant = (chat) => {

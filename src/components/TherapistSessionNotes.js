@@ -24,7 +24,10 @@ export default function TherapistSessionNotes() {
 
   return (
     <div className="therapist-session-notes-list">
-      <h1>Selecciona Paciente para Notas</h1>
+      <div className="patients-header">
+        <Link to="/therapist" className="back-link">← Volver</Link>
+        <h1>Selecciona Paciente para Notas</h1>
+      </div>
       <div className="patients-grid">
         {patients.map(p => (
           <Link

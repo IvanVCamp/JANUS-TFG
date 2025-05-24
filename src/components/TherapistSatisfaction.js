@@ -1,7 +1,7 @@
 // src/components/TherapistInterests.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import '../styles/patientsList.css'; // Reutilizamos el CSS de la tabla
 
 export default function TherapistSatisfaction() {
@@ -40,7 +40,10 @@ export default function TherapistSatisfaction() {
 
   return (
     <div className="therapist-patient-list">
-      <h1>Pacientes - Intereses Emocionales</h1>
+      <div className="patients-header">
+        <Link to="/therapist" className="back-link">← Volver</Link>
+        <h1>Pacientes – Estadísticas Emocionales</h1>
+      </div>
       <table className="patient-table">
         <thead>
           <tr>

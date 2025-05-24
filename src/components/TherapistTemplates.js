@@ -1,7 +1,7 @@
 // src/pages/RoutineTemplatesPage.js
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { useNavigate }                    from 'react-router-dom'
+import { useNavigate, Link }                    from 'react-router-dom'
 import { FaTrash, FaEdit, FaEye }         from 'react-icons/fa'
 import defaultProfile                     from '../assets/default-profile.png'
 import '../styles/routineTemplates.css'
@@ -133,11 +133,9 @@ export default function RoutineTemplatesPage() {
     <div className="routine-templates-page">
       <div className="tpl-container">
         <div className="tpl-header">
+          <Link to="/therapist" className="back-link">← Volver</Link>
           <h1>Mis Plantillas</h1>
-          <button
-            className="btn-new"
-            onClick={() => navigate('/therapist/templates/new')}
-          >
+          <button className="btn-new" onClick={() => navigate('/therapist/templates/new')}>
             📄 Nueva plantilla
           </button>
         </div>

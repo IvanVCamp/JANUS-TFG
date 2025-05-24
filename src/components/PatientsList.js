@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import '../styles/patientsList.css';
 
 function PatientsList() {
@@ -131,7 +131,11 @@ function PatientsList() {
 
   return (
     <div className="therapist-patient-list">
-      <h1>Listado de Pacientes</h1>
+      <div className="patients-header">
+        <Link to="/therapist" className="back-link">← Volver</Link>
+        <h1>Listado de Pacientes</h1>
+      </div>
+
       {loading ? (
         <p>Cargando pacientes...</p>
       ) : (

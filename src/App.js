@@ -55,7 +55,7 @@ function App() {
         <Route path="/therapist/templates/:id/edit" element={<EditRoutineTemplatePage />} />
         <Route path="/patient/templates" element={<PatientTemplatesPage />} />
         <Route path="/patient/templates/:instanceId" element={<PatientTemplateDetail />} />
-        <Route path="/therapist/templates/:patientId"element={<TherapistPatientTemplatesDetail />}/>
+        <Route path="/therapist/templates/patient/:patientId"element={<TherapistPatientTemplatesDetail />}/>
         <Route path="/therapist/templates"               element={<TherapistTemplates />} />
         <Route path="/therapist/session-notes"           element={<TherapistSessionNotes />} />
         <Route path="/therapist/session-notes/:patientId" element={<TherapistSessionNotesDetail />} />

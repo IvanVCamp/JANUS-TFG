@@ -3,6 +3,15 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/emotionsDiary.css';
 
+function decodeJwt(token) {
+  try {
+    const b64    = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    return JSON.parse(atob(b64));
+  } catch {
+    return {};
+  }
+}
+
 function EmotionsDiary() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -17,6 +26,7 @@ function EmotionsDiary() {
 
   // Estado para el modo snapshot (diario guardado)
   const [snapshotDiary, setSnapshotDiary] = useState(null);
+  const [userRole, setUserRole] = useState(null);
 
   // Niveles de felicidad para el termómetro
   const levels = [
@@ -30,9 +40,13 @@ function EmotionsDiary() {
   // Verificar que exista token; sino, redirige al login
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) navigate('/');
+    if (!token) {
+      navigate('/');
+      return;
+    }
+    const payload = decodeJwt(token);
+    setUserRole(payload.user?.role || payload.role);
   }, [navigate]);
-
   // Si estamos en modo snapshot, obtenemos el último diario guardado
   useEffect(() => {
     if (isViewMode) {
@@ -112,6 +126,16 @@ function EmotionsDiary() {
     }
   };
 
+  const handleGoBack = () => {
+    if (isViewMode) {
+      // en snapshot, venimos desde /therapist/patients
+      navigate('/therapist/patients');
+    } else {
+      // en interactivo, paciente vuelve a /dashboard
+      navigate(userRole === 'terapeuta' ? '/therapist/patients' : '/dashboard');
+    }
+  };
+
   // Renderizado condicional según el modo: Snapshot (Vista) o Interactivo (Paciente)
   if (isViewMode) {
     // Modo Snapshot: Se muestra el diario de emociones guardado de forma estática
@@ -119,7 +143,10 @@ function EmotionsDiary() {
       <div className="diario-emociones-container">
         <header className="de-header">
           <div className="de-header-left">
-            <button className="back-dashboard-btn" onClick={() => navigate('/dashboard')}>←</button>
+            <button
+              className="back-dashboard-btn"
+              onClick={handleGoBack}
+            >←</button>            
             <h1>Diario de Emociones - Último Guardado</h1>
           </div>
         </header>
@@ -163,7 +190,10 @@ function EmotionsDiary() {
     <div className="diario-emociones-container">
       <header className="de-header">
         <div className="de-header-left">
-          <button className="back-dashboard-btn" onClick={() => navigate('/dashboard')}>←</button>
+          <button
+            className="back-dashboard-btn"
+            onClick={handleGoBack}
+          >←</button>         
           <h1>Diario de Emociones</h1>
         </div>
       </header>

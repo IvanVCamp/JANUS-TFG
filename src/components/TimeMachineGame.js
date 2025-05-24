@@ -39,6 +39,15 @@ const generateTimeSlots = () => {
   return slots;
 };
 
+function decodeJwt(token) {
+  try {
+    const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(b64));
+  } catch {
+    return {};
+  }
+}
+
 function TimeMachineGame() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -51,13 +60,17 @@ function TimeMachineGame() {
   const [selectedDay, setSelectedDay] = useState('Miércoles');
   const [poolActivities] = useState(initialActivities);
   const [timeSlots, setTimeSlots] = useState(generateTimeSlots());
+  const [userRole, setUserRole] = useState(null);
 
   // Verificar token; si no existe, redirigir al login
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
       navigate('/');
+      return;
     }
+    const payload = decodeJwt(token);
+    setUserRole(payload.user?.role || payload.role);
   }, [navigate]);
 
   // Si estamos en modo vista, se obtiene el snapshot guardado de la Máquina del Tiempo
@@ -89,6 +102,15 @@ function TimeMachineGame() {
       fetchSnapshot();
     }
   }, [isViewMode, queryPatientId]);
+
+  const handleGoBack = () => {
+    if (userRole === 'terapeuta') {
+      navigate('/therapist/patients');
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
 
   // Función onDragEnd: si está en modo vista, se deshabilita la edición
   const onDragEnd = (result) => {
@@ -177,7 +199,7 @@ function TimeMachineGame() {
         headers: { 'x-auth-token': token }
       });
       alert('¡Tu día ha sido guardado!');
-      navigate('/dashboard');
+      handleGoBack();
     } catch (err) {
       console.error(err);
       alert('Error al guardar el resultado.');
@@ -188,7 +210,7 @@ function TimeMachineGame() {
     <div className="time-machine-game-container">
       <header className="tmg-header">
         <div className="tmg-header-left">
-          <button className="back-dashboard-btn" onClick={() => navigate('/dashboard')}>←</button>
+          <button className="back-dashboard-btn" onClick={handleGoBack}>←</button>
           <h1>
             La Máquina del Tiempo {isViewMode && "- Snapshot"}
           </h1>

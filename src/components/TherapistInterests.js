@@ -1,7 +1,7 @@
 // src/components/TherapistInterests.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import '../styles/patientsList.css';
 
 export default function TherapistInterests() {
@@ -46,10 +46,14 @@ export default function TherapistInterests() {
 
   return (
     <div className="therapist-patient-list">
-      <h1>Pacientes – Intereses por Planet Map</h1>
-      {filtered.length === 0 
-        ? <p>No hay pacientes con Planet Map completado.</p>
-        : (
+      <div className="patients-header">
+        <Link to="/therapist" className="back-link">← Volver</Link>
+        <h1>Pacientes – Intereses por Planet Map</h1>
+      </div>
+
+      {filtered.length === 0 ? (
+        <p>No hay pacientes con Planet Map completado.</p>
+      ) : (
           <table className="patient-table">
             <thead>
               <tr>

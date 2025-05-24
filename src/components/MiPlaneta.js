@@ -20,6 +20,15 @@ const sizeScales = {
   3: 1.2
 };
 
+function decodeJwt(token) {
+  try {
+    const b64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    return JSON.parse(atob(b64));
+  } catch {
+    return {};
+  }
+}
+
 function MiPlaneta() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,11 +41,14 @@ function MiPlaneta() {
   const [planetElements, setPlanetElements] = useState([]);
   const [planetName, setPlanetName] = useState("Mi Planeta");
   const [planetSlogan, setPlanetSlogan] = useState("");
+  const [userRole, setUserRole] = useState(null);
 
   // Verifica que haya token; si no, redirige
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) navigate('/');
+    const payload = decodeJwt(token);
+    setUserRole(payload.user?.role || payload.role);
   }, [navigate]);
 
   // Si estamos en "modo vista" (para el terapeuta), obtenemos la snapshot
@@ -68,9 +80,14 @@ function MiPlaneta() {
     }
   }, [isViewMode, queryPatientId]);
 
-  // ———————————————————————
-  // Funciones de edición (solo en modo normal, NO en modo vista)
-  // ———————————————————————
+  const handleGoBack = () => {
+    if (userRole === 'terapeuta') {
+      navigate('/therapist/patients');
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
   const handleDragStart = (e, element) => {
     if (isViewMode) return; // no se permite en modo vista
     e.dataTransfer.setData("text/plain", JSON.stringify(element));
@@ -166,7 +183,7 @@ function MiPlaneta() {
         headers: { 'x-auth-token': token }
       });
       alert('Planeta guardado exitosamente.');
-      navigate('/dashboard');
+      handleGoBack();
     } catch (err) {
       console.error(err);
       alert('Error al guardar el planeta.');
@@ -176,7 +193,7 @@ function MiPlaneta() {
   return (
     <div className="planet-map-container">
       <header className="pm-header">
-        <button className="back-btn" onClick={() => navigate('/dashboard')}>←</button>
+        <button className="back-btn" onClick={handleGoBack}>←</button>
         <h1>
           {planetName} {isViewMode && "- Snapshot"} 
           – {isViewMode ? "Vista del último guardado" : "Crea tu hábitat"}
