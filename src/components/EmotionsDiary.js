@@ -53,7 +53,7 @@ function EmotionsDiary() {
       const fetchSnapshotDiary = async () => {
         try {
           const token = localStorage.getItem('token');
-          const response = await axios.get(`https://localhost:8080/api/emotions?patientId=${queryPatientId}`, {
+          const response = await axios.get(`https://janus-1030141284513.europe-southwest1.run.app/api/emotions?patientId=${queryPatientId}`, {
             headers: { 'x-auth-token': token }
           });
           if (response.data && response.data.length > 0) {
@@ -69,7 +69,7 @@ function EmotionsDiary() {
       // En modo interactivo, cargamos las actividades a partir de los resultados de la Máquina del Tiempo
       const token = localStorage.getItem('token');
       axios
-        .get('http://localhost:8080/api/game', { headers: { 'x-auth-token': token } })
+        .get('https://janus-1030141284513.europe-southwest1.run.app/api/game', { headers: { 'x-auth-token': token } })
         .then(response => {
           const gameResults = response.data;
           const activityMap = {};

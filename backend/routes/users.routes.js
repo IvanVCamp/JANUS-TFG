@@ -3,19 +3,23 @@ const router  = express.Router();
 const auth    = require('../middleware/auth.middleware');
 const c       = require('../controllers/users.controller');
 const multer  = require('multer');
+const fs      = require('fs');
 const path    = require('path');
 
-// multer config: guarda en /uploads/avatars
+const avatarsDir = path.join(__dirname, '../../uploads/avatars');
+fs.mkdirSync(avatarsDir, { recursive: true });
+console.log('[DEBUG] carpeta avatars disponible en:', avatarsDir);
+
+// 2) Configura Multer
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/avatars')
-  },
+  destination: (req, file, cb) => cb(null, avatarsDir),
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname)
-    cb(null, `${req.user.id}${ext}`)
+    const ext = path.extname(file.originalname).toLowerCase() || '.png';
+    cb(null, req.user.id + ext);
   }
 });
 const upload = multer({ storage });
+
 
 // GET /api/users/me
 router.get('/me', auth, c.getMe);

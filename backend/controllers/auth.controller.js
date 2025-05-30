@@ -116,8 +116,8 @@ exports.forgotPassword = async (req, res) => {
     }
 
     const resetToken = generateResetToken(user._id);
-    const resetUrl = `https://localhost:8080/reset-password?token=${resetToken}`;
-
+    const resetUrl = `https://janus-1030141284513.europe-southwest1.run.app/reset-password?token=${resetToken}`;
+localhost
     await sendEmail({
       to: user.email,
       subject: 'Recuperación de contraseña',

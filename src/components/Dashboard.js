@@ -66,8 +66,7 @@ export default function Dashboard() {
     const token = localStorage.getItem('token')
     axios.put('/api/users/me/avatar', formData, {
       headers: {
-        'x-auth-token': token,
-        'Content-Type': 'multipart/form-data'
+        'x-auth-token': token
       }
     }).then(({ data }) => {
       setProfilePic(data.avatar)

@@ -23,7 +23,7 @@ exports.createInvitation = async (req, res) => {
     await invitation.save();
 
     // Generar un enlace de registro usando el ID de la invitación
-    const registrationLink = `https://localhost:8080/register?invitationId=${invitation._id}`;
+    const registrationLink = `https://janus-1030141284513.europe-southwest1.run.app/register?invitationId=${invitation._id}`;
     const emailSubject = 'Invitación para registrarte en JANUS';
     const emailText = `Hola,\n\nSe te ha invitado a registrarte en la plataforma JANUS. 
 Por favor, haz clic en el siguiente enlace para completar tu registro:\n\n${registrationLink}\n\nAtentamente,\nTu terapeuta`;

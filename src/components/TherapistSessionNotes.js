@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios                      from 'axios';
 import { Link }                   from 'react-router-dom';
 import '../styles/patientsList.css';
-import '../Styles/therapistSessionNotes.css';
+import '../styles/therapistSessionNotes.css';
 
 export default function TherapistSessionNotes() {
   const [patients, setPatients] = useState([]);

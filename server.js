@@ -18,7 +18,6 @@ app.use(express.json());
 // Carpeta de uploads
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
-app.use('/uploads', express.static(uploadsDir));
 
 // 4) Servir build de React **antes** de las APIs
 const frontendPath = path.join(__dirname, 'build');
@@ -37,6 +36,11 @@ app.use('/api/therapist', require('./backend/routes/therapist.routes'));
 app.use('/api/routines/instances', require('./backend/routes/routineInstances.routes'));
 app.use('/api/routines/templates', require('./backend/routes/routineTemplate.routes'));
 app.use('/api/therapist/patients', require('./backend/routes/sessionNotes.routes'));
+app.use('/uploads/avatars', express.static(uploadsDir));
+app.use(
+  '/uploads/avatars',
+  express.static(path.join(__dirname, 'uploads', 'avatars'))
+);
 app.get('*', (req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
 });

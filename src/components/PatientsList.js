@@ -73,7 +73,7 @@ function PatientsList() {
   const fetchEmotionsDiaryResult = async (patientId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`https://localhost:8080/api/emotions?patientId=${patientId}`, {
+      const response = await axios.get(`https://janus-1030141284513.europe-southwest1.run.app/api/emotions?patientId=${patientId}`, {
         headers: { 'x-auth-token': token }
       });
       if (response.data && response.data.length > 0) {
